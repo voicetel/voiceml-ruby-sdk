@@ -1,0 +1,17 @@
+# Gem build
+*.gem
+pkg/
+
+# Bundler
+.bundle/
+vendor/bundle/
+Gemfile.lock
+
+# Test
+.rspec_status
+coverage/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
