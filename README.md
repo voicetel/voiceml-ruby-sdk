@@ -1,6 +1,6 @@
 # VoiceML Ruby SDK
 
-Official Ruby SDK for the [VoiceML REST API](https://voiceml.voicetel.com) —
+Official Ruby SDK for the [VoiceML REST API](https://voicetel.com/docs/api/v0.6/voiceml/) —
 VoiceTel's outbound voice + AMD service with a Twilio-shaped REST surface.
 
 The wire shape, auth model, error codes, and pagination envelope all match
