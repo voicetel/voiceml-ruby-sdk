@@ -16,7 +16,7 @@ module VoiceML
       sid account_sid phone_number friendly_name api_version uri
       voice_url voice_method voice_fallback_url voice_fallback_method
       voice_application_sid voice_caller_id_lookup voice_receive_mode
-      origin beta capabilities
+      origin beta capabilities type
       sms_url sms_method sms_fallback_url sms_fallback_method sms_application_sid
       status_callback status_callback_method
       trunk_sid address_sid address_requirements identity_sid bundle_sid
