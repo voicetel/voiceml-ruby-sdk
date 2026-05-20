@@ -226,14 +226,17 @@ module VoiceML
 
       code = nil
       message = "HTTP #{status}"
+      more_info = nil
       if body.is_a?(Hash)
         rc = body['code']
         code = rc if rc.is_a?(Integer) || rc.is_a?(String)
         m = body['message']
         message = m if m.is_a?(String) && !m.empty?
+        mi = body['more_info']
+        more_info = mi if mi.is_a?(String) && !mi.empty?
       end
 
-      raise VoiceML.error_from_response(status, message, code: code, body: body)
+      raise VoiceML.error_from_response(status, message, code: code, body: body, more_info: more_info)
     end
 
     def backoff_delay(attempt, response = nil)

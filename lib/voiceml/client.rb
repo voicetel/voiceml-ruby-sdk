@@ -6,6 +6,7 @@ require_relative 'resources/conferences'
 require_relative 'resources/queues'
 require_relative 'resources/applications'
 require_relative 'resources/recordings'
+require_relative 'resources/incoming_phone_numbers'
 require_relative 'resources/diagnostics'
 
 module VoiceML
@@ -24,34 +25,46 @@ module VoiceML
   #   )
   #   puts call.sid, call.status
   class Client
-    attr_reader :calls, :conferences, :queues, :applications, :recordings, :diagnostics
+    attr_reader :calls, :conferences, :queues, :applications, :recordings,
+                :incoming_phone_numbers, :diagnostics
 
     # @param account_sid [String] Twilio-format AccountSid (`AC` + 32 hex).
-    # @param api_key     [String] per-tenant API key.
+    # @param api_key     [String, nil] per-tenant API key. Pass either `api_key:` or the
+    #   Twilio-shape alias `auth_token:` (not both — `ArgumentError` if you do).
+    # @param auth_token  [String, nil] Twilio-shape alias for `api_key`. Lets twilio-ruby
+    #   code (`VoiceML::Client.new(account_sid: sid, auth_token: token)`) work unchanged.
     # @param base_url    [String] server base URL. Defaults to `https://voiceml.voicetel.com`.
     # @param timeout     [Numeric] per-request timeout in seconds. Defaults to 30.
     # @param max_retries [Integer] retry attempts for 429/5xx and transport errors. Defaults to 2.
     # @param user_agent  [String, nil] override the `User-Agent` header. Defaults to
     #   `"voiceml-ruby/#{VERSION}"`.
-    def initialize(account_sid:, api_key:, base_url: Transport::DEFAULT_BASE_URL,
+    def initialize(account_sid:, api_key: nil, auth_token: nil,
+                   base_url: Transport::DEFAULT_BASE_URL,
                    timeout: Transport::DEFAULT_TIMEOUT,
                    max_retries: Transport::DEFAULT_MAX_RETRIES,
                    user_agent: nil)
+      if !api_key.nil? && !auth_token.nil?
+        raise ArgumentError, 'pass either api_key: or auth_token:, not both'
+      end
+
+      resolved_key = api_key || auth_token
+
       @transport = Transport.new(
         account_sid: account_sid,
-        api_key:     api_key,
+        api_key:     resolved_key,
         base_url:    base_url,
         timeout:     timeout,
         max_retries: max_retries,
         user_agent:  user_agent
       )
 
-      @calls        = CallsResource.new(@transport)
-      @conferences  = ConferencesResource.new(@transport)
-      @queues       = QueuesResource.new(@transport)
-      @applications = ApplicationsResource.new(@transport)
-      @recordings   = RecordingsResource.new(@transport)
-      @diagnostics  = DiagnosticsResource.new(@transport)
+      @calls                  = CallsResource.new(@transport)
+      @conferences            = ConferencesResource.new(@transport)
+      @queues                 = QueuesResource.new(@transport)
+      @applications           = ApplicationsResource.new(@transport)
+      @recordings             = RecordingsResource.new(@transport)
+      @incoming_phone_numbers = IncomingPhoneNumbersResource.new(@transport)
+      @diagnostics            = DiagnosticsResource.new(@transport)
     end
 
     def account_sid

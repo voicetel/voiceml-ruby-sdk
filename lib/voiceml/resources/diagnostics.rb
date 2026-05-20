@@ -52,7 +52,8 @@ module VoiceML
           response.body
         end
         message = body.is_a?(Hash) && body['message'].is_a?(String) ? body['message'] : "HTTP #{status}"
-        raise VoiceML.error_from_response(status, message, body: body)
+        more_info = body.is_a?(Hash) && body['more_info'].is_a?(String) ? body['more_info'] : nil
+        raise VoiceML.error_from_response(status, message, body: body, more_info: more_info)
       end
 
       return nil if response.body.nil? || response.body.empty?

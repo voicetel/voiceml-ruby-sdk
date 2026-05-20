@@ -27,8 +27,8 @@ def base_url
   'https://voiceml.voicetel.com'
 end
 
-def accounts_path(*parts)
-  "/2010-04-01/Accounts/#{ACCOUNT_SID}/#{parts.join('/')}"
+def accounts_path(*parts, suffix: '.json')
+  "/2010-04-01/Accounts/#{ACCOUNT_SID}/#{parts.join('/')}#{suffix}"
 end
 
 def basic_auth_header

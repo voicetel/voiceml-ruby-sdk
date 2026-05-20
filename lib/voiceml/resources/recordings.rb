@@ -39,7 +39,7 @@ module VoiceML
     # @return [VoiceML::RecordingAudio]
     def get_audio(recording_sid)
       status, content, headers = @transport.fetch_bytes(
-        "#{path('Recordings', recording_sid)}.wav"
+        "#{path('Recordings', recording_sid, suffix: '')}.wav"
       )
       content_type = headers['content-type']
       content_type = content_type.first if content_type.is_a?(Array)
