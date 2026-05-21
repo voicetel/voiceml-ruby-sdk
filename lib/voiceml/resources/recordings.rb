@@ -11,8 +11,13 @@ module VoiceML
   # and delete.
   class RecordingsResource < BaseResource
     LIST_FIELDS = {
-      'Page'     => :page,
-      'PageSize' => :page_size
+      'DateCreated'   => :date_created,
+      'DateCreated<'  => :date_created_lt,
+      'DateCreated>'  => :date_created_gt,
+      'CallSid'       => :call_sid,
+      'ConferenceSid' => :conference_sid,
+      'Page'          => :page,
+      'PageSize'      => :page_size
     }.freeze
 
     # @return [VoiceML::RecordingList]

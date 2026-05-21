@@ -18,6 +18,12 @@ module VoiceML
       'StatusCallbackEvent'    => :status_callback_event
     }.freeze
 
+    LIST_FIELDS = {
+      'FriendlyName' => :friendly_name,
+      'Page'         => :page,
+      'PageSize'     => :page_size
+    }.freeze
+
     # @return [VoiceML::Application]
     def create(**kwargs)
       Application.from_hash(
@@ -27,8 +33,10 @@ module VoiceML
     end
 
     # @return [VoiceML::ApplicationList]
-    def list
-      ApplicationList.from_hash(@transport.request(:get, path('Applications')))
+    def list(**kwargs)
+      ApplicationList.from_hash(
+        @transport.request(:get, path('Applications'), params: form_params(LIST_FIELDS, kwargs))
+      )
     end
 
     # @return [VoiceML::Application]

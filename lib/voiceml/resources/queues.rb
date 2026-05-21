@@ -16,6 +16,11 @@ module VoiceML
       'Method' => :method
     }.freeze
 
+    LIST_MEMBERS_FIELDS = {
+      'Page'     => :page,
+      'PageSize' => :page_size
+    }.freeze
+
     # @return [VoiceML::Queue]
     def create(**kwargs)
       Queue.from_hash(
@@ -50,9 +55,10 @@ module VoiceML
     # --- Members ---
 
     # @return [VoiceML::QueueMemberList]
-    def list_members(queue_sid)
+    def list_members(queue_sid, **kwargs)
       QueueMemberList.from_hash(
-        @transport.request(:get, path('Queues', queue_sid, 'Members'))
+        @transport.request(:get, path('Queues', queue_sid, 'Members'),
+                           params: form_params(LIST_MEMBERS_FIELDS, kwargs))
       )
     end
 

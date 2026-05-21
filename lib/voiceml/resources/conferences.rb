@@ -12,9 +12,26 @@ module VoiceML
       'Hold'  => :hold
     }.freeze
 
+    LIST_FIELDS = {
+      'FriendlyName' => :friendly_name,
+      'Status'       => :status,
+      'Page'         => :page,
+      'PageSize'     => :page_size
+    }.freeze
+
+    LIST_PARTICIPANTS_FIELDS = {
+      'Muted'    => :muted,
+      'Hold'     => :hold,
+      'Coaching' => :coaching,
+      'Page'     => :page,
+      'PageSize' => :page_size
+    }.freeze
+
     # @return [VoiceML::ConferenceList]
-    def list
-      ConferenceList.from_hash(@transport.request(:get, path('Conferences')))
+    def list(**kwargs)
+      ConferenceList.from_hash(
+        @transport.request(:get, path('Conferences'), params: form_params(LIST_FIELDS, kwargs))
+      )
     end
 
     # @return [VoiceML::Conference]
@@ -33,9 +50,10 @@ module VoiceML
     # --- Participants ---
 
     # @return [VoiceML::ParticipantList]
-    def list_participants(conference_sid)
+    def list_participants(conference_sid, **kwargs)
       ParticipantList.from_hash(
-        @transport.request(:get, path('Conferences', conference_sid, 'Participants'))
+        @transport.request(:get, path('Conferences', conference_sid, 'Participants'),
+                           params: form_params(LIST_PARTICIPANTS_FIELDS, kwargs))
       )
     end
 

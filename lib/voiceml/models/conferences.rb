@@ -46,7 +46,7 @@ module VoiceML
   # A participant in a live conference.
   class Participant
     ATTRIBUTES = %w[
-      call_sid conference_sid account_sid muted hold
+      call_sid conference_sid account_sid muted hold coaching call_sid_to_coach queue_time
       start_conference_on_enter end_conference_on_exit status label
       api_version uri date_created date_updated
     ].freeze

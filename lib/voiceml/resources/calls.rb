@@ -70,11 +70,30 @@ module VoiceML
       'From'           => :from,
       'Status'         => :status,
       'ParentCallSid'  => :parent_call_sid,
+      'StartTime'      => :start_time,
+      'StartTime<'     => :start_time_lt,
+      'StartTime>'     => :start_time_gt,
       # Note: spec defines `StartTime>=` and `StartTime<=` as the literal query names.
       'StartTime>='    => :start_time_gte,
       'StartTime<='    => :start_time_lte,
+      'EndTime'        => :end_time,
+      'EndTime<'       => :end_time_lt,
+      'EndTime>'       => :end_time_gt,
       'Page'           => :page,
       'PageSize'       => :page_size
+    }.freeze
+
+    LIST_RECORDINGS_FIELDS = {
+      'DateCreated'   => :date_created,
+      'DateCreated<'  => :date_created_lt,
+      'DateCreated>'  => :date_created_gt,
+      'Page'          => :page,
+      'PageSize'      => :page_size
+    }.freeze
+
+    LIST_STUB_PAGE_FIELDS = {
+      'Page'     => :page,
+      'PageSize' => :page_size
     }.freeze
 
     START_RECORDING_FIELDS = {
@@ -154,8 +173,11 @@ module VoiceML
     # --- Call-scoped Recordings ---
 
     # @return [VoiceML::RecordingList]
-    def list_recordings(call_sid)
-      RecordingList.from_hash(@transport.request(:get, path('Calls', call_sid, 'Recordings')))
+    def list_recordings(call_sid, **kwargs)
+      RecordingList.from_hash(
+        @transport.request(:get, path('Calls', call_sid, 'Recordings'),
+                           params: form_params(LIST_RECORDINGS_FIELDS, kwargs))
+      )
     end
 
     # @return [VoiceML::Recording]
@@ -274,15 +296,19 @@ module VoiceML
     # --- Notifications / Events (compat stubs) ---
 
     # @return [VoiceML::NotificationsList]
-    def list_notifications(call_sid)
+    def list_notifications(call_sid, **kwargs)
       NotificationsList.from_hash(
-        @transport.request(:get, path('Calls', call_sid, 'Notifications'))
+        @transport.request(:get, path('Calls', call_sid, 'Notifications'),
+                           params: form_params(LIST_STUB_PAGE_FIELDS, kwargs))
       )
     end
 
     # @return [VoiceML::EventsList]
-    def list_events(call_sid)
-      EventsList.from_hash(@transport.request(:get, path('Calls', call_sid, 'Events')))
+    def list_events(call_sid, **kwargs)
+      EventsList.from_hash(
+        @transport.request(:get, path('Calls', call_sid, 'Events'),
+                           params: form_params(LIST_STUB_PAGE_FIELDS, kwargs))
+      )
     end
 
     # `POST /Calls/{sid}/UserDefinedMessages` — always raises `NotImplementedAPIError`.

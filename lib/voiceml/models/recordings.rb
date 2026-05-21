@@ -8,7 +8,7 @@ module VoiceML
     ATTRIBUTES = %w[
       sid account_sid call_sid conference_sid status source channels
       duration api_version uri date_created date_updated start_time
-      price price_unit encryption_details subresource_uris media_url
+      price price_unit encryption_details subresource_uris media_url error_code
     ].freeze
 
     attr_reader(*ATTRIBUTES.map(&:to_sym))
