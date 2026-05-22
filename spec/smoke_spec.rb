@@ -104,6 +104,17 @@ RSpec.describe VoiceML::Client do
       expect(result.calls).to eq([])
       expect(result.page_size).to eq(50)
     end
+
+    it 'serialises PageToken on the wire' do
+      stub = stub_request(:get, "#{base_url}#{accounts_path('Calls')}")
+             .with(query: { 'PageToken' => 'cursor-abc123' })
+             .to_return(status: 200, body: { calls: [], page: 0, page_size: 50 }.to_json,
+                        headers: { 'Content-Type' => 'application/json' })
+
+      client.calls.list(page_token: 'cursor-abc123')
+
+      expect(stub).to have_been_requested
+    end
   end
 
   describe 'boolean encoding' do

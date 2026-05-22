@@ -13,7 +13,8 @@ module VoiceML
     LIST_FIELDS = {
       'PhoneNumber' => :phone_number,
       'Page'        => :page,
-      'PageSize'    => :page_size
+      'PageSize'    => :page_size,
+      'PageToken'   => :page_token
     }.freeze
 
     CREATE_FIELDS = {

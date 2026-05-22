@@ -21,7 +21,8 @@ module VoiceML
     LIST_FIELDS = {
       'FriendlyName' => :friendly_name,
       'Page'         => :page,
-      'PageSize'     => :page_size
+      'PageSize'     => :page_size,
+      'PageToken'    => :page_token
     }.freeze
 
     # @return [VoiceML::Application]

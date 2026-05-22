@@ -16,7 +16,8 @@ module VoiceML
       'FriendlyName' => :friendly_name,
       'Status'       => :status,
       'Page'         => :page,
-      'PageSize'     => :page_size
+      'PageSize'     => :page_size,
+      'PageToken'    => :page_token
     }.freeze
 
     LIST_PARTICIPANTS_FIELDS = {
@@ -24,7 +25,17 @@ module VoiceML
       'Hold'     => :hold,
       'Coaching' => :coaching,
       'Page'     => :page,
-      'PageSize' => :page_size
+      'PageSize' => :page_size,
+      'PageToken' => :page_token
+    }.freeze
+
+    LIST_CALL_RECORDINGS_FIELDS = {
+      'DateCreated'   => :date_created,
+      'DateCreated<'  => :date_created_lt,
+      'DateCreated>'  => :date_created_gt,
+      'Page'          => :page,
+      'PageSize'      => :page_size,
+      'PageToken'     => :page_token
     }.freeze
 
     # @return [VoiceML::ConferenceList]
@@ -85,9 +96,10 @@ module VoiceML
     # --- Recordings ---
 
     # @return [VoiceML::RecordingList]
-    def list_recordings(conference_sid)
+    def list_recordings(conference_sid, **kwargs)
       RecordingList.from_hash(
-        @transport.request(:get, path('Conferences', conference_sid, 'Recordings'))
+        @transport.request(:get, path('Conferences', conference_sid, 'Recordings'),
+                           params: form_params(LIST_CALL_RECORDINGS_FIELDS, kwargs))
       )
     end
   end

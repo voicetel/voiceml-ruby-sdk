@@ -80,7 +80,8 @@ module VoiceML
       'EndTime<'       => :end_time_lt,
       'EndTime>'       => :end_time_gt,
       'Page'           => :page,
-      'PageSize'       => :page_size
+      'PageSize'       => :page_size,
+      'PageToken'      => :page_token
     }.freeze
 
     LIST_RECORDINGS_FIELDS = {
@@ -88,12 +89,14 @@ module VoiceML
       'DateCreated<'  => :date_created_lt,
       'DateCreated>'  => :date_created_gt,
       'Page'          => :page,
-      'PageSize'      => :page_size
+      'PageSize'      => :page_size,
+      'PageToken'     => :page_token
     }.freeze
 
     LIST_STUB_PAGE_FIELDS = {
-      'Page'     => :page,
-      'PageSize' => :page_size
+      'Page'      => :page,
+      'PageSize'  => :page_size,
+      'PageToken' => :page_token
     }.freeze
 
     START_RECORDING_FIELDS = {

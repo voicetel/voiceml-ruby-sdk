@@ -17,7 +17,8 @@ module VoiceML
       'CallSid'       => :call_sid,
       'ConferenceSid' => :conference_sid,
       'Page'          => :page,
-      'PageSize'      => :page_size
+      'PageSize'      => :page_size,
+      'PageToken'     => :page_token
     }.freeze
 
     # @return [VoiceML::RecordingList]
