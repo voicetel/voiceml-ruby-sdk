@@ -99,6 +99,16 @@ module VoiceML
       'PageToken' => :page_token
     }.freeze
 
+    LIST_NOTIFICATIONS_FIELDS = {
+      'Page'          => :page,
+      'PageSize'      => :page_size,
+      'PageToken'     => :page_token,
+      'Log'           => :log,
+      'MessageDate'   => :message_date,
+      'MessageDate<'  => :message_date_lt,
+      'MessageDate>'  => :message_date_gt
+    }.freeze
+
     START_RECORDING_FIELDS = {
       'RecordingMaxDuration'           => :recording_max_duration,
       'RecordingChannels'              => :recording_channels,
@@ -302,8 +312,13 @@ module VoiceML
     def list_notifications(call_sid, **kwargs)
       NotificationsList.from_hash(
         @transport.request(:get, path('Calls', call_sid, 'Notifications'),
-                           params: form_params(LIST_STUB_PAGE_FIELDS, kwargs))
+                           params: form_params(LIST_NOTIFICATIONS_FIELDS, kwargs))
       )
+    end
+
+    # @return [Hash]
+    def get_notification(call_sid, notification_sid)
+      @transport.request(:get, path('Calls', call_sid, 'Notifications', notification_sid))
     end
 
     # @return [VoiceML::EventsList]

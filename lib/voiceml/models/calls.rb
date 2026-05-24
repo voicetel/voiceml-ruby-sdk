@@ -3,7 +3,7 @@
 require_relative 'common'
 
 module VoiceML
-  # A Twilio-shape Call resource. Returned by `client.calls.create`, `client.calls.get`,
+  # A Twilio-compatible Call resource. Returned by `client.calls.create`, `client.calls.get`,
   # `client.calls.update`, and listed in `CallList#calls`.
   class Call
     ATTRIBUTES = %w[

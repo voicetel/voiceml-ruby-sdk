@@ -15,9 +15,32 @@ module VoiceML
     LIST_FIELDS = {
       'FriendlyName' => :friendly_name,
       'Status'       => :status,
+      'DateCreated'  => :date_created,
+      'DateCreated<' => :date_created_lt,
+      'DateCreated>' => :date_created_gt,
+      'DateUpdated'  => :date_updated,
+      'DateUpdated<' => :date_updated_lt,
+      'DateUpdated>' => :date_updated_gt,
       'Page'         => :page,
       'PageSize'     => :page_size,
       'PageToken'    => :page_token
+    }.freeze
+
+    CREATE_PARTICIPANT_FIELDS = {
+      'From'                   => :from,
+      'To'                     => :to,
+      'Label'                  => :label,
+      'Muted'                  => :muted,
+      'StartConferenceOnEnter' => :start_conference_on_enter,
+      'EndConferenceOnExit'    => :end_conference_on_exit,
+      'Timeout'                => :timeout,
+      'StatusCallback'         => :status_callback,
+      'StatusCallbackMethod'   => :status_callback_method,
+      'StatusCallbackEvent'    => :status_callback_event
+    }.freeze
+
+    UPDATE_RECORDING_FIELDS = {
+      'Status' => :status
     }.freeze
 
     LIST_PARTICIPANTS_FIELDS = {
@@ -93,6 +116,18 @@ module VoiceML
       nil
     end
 
+    # Dial a leg into a conference.
+    # @return [VoiceML::Participant]
+    def create_participant(conference_sid, from:, to:, **kwargs)
+      kwargs = kwargs.merge(from: from, to: to)
+      data = @transport.request(
+        :post,
+        path('Conferences', conference_sid, 'Participants'),
+        form: form_params(CREATE_PARTICIPANT_FIELDS, kwargs)
+      )
+      Participant.from_hash(data)
+    end
+
     # --- Recordings ---
 
     # @return [VoiceML::RecordingList]
@@ -101,6 +136,29 @@ module VoiceML
         @transport.request(:get, path('Conferences', conference_sid, 'Recordings'),
                            params: form_params(LIST_CALL_RECORDINGS_FIELDS, kwargs))
       )
+    end
+
+    # @return [VoiceML::Recording]
+    def get_recording(conference_sid, recording_sid)
+      Recording.from_hash(
+        @transport.request(:get, path('Conferences', conference_sid, 'Recordings', recording_sid))
+      )
+    end
+
+    # @return [VoiceML::Recording]
+    def update_recording(conference_sid, recording_sid, **kwargs)
+      data = @transport.request(
+        :post,
+        path('Conferences', conference_sid, 'Recordings', recording_sid),
+        form: form_params(UPDATE_RECORDING_FIELDS, kwargs)
+      )
+      Recording.from_hash(data)
+    end
+
+    # @return [nil]
+    def delete_recording(conference_sid, recording_sid)
+      @transport.request(:delete, path('Conferences', conference_sid, 'Recordings', recording_sid))
+      nil
     end
   end
 end

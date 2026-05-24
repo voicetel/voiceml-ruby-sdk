@@ -1,7 +1,7 @@
 # VoiceML Ruby SDK
 
 Official Ruby SDK for the [VoiceML REST API](https://voicetel.com/docs/api/v0.6/voiceml/) —
-VoiceTel's outbound voice + AMD service with a Twilio-shaped REST surface.
+VoiceTel's outbound voice + AMD service with a Twilio-compatible REST surface.
 
 The wire shape, auth model, error codes, and pagination envelope all match
 Twilio's documented behaviour, so existing Twilio client patterns map directly.
@@ -69,7 +69,7 @@ Twilio's PascalCase wire field names internally.
 ## Errors
 
 All errors inherit from `VoiceML::Error`. The `VoiceML::ApiError` family carries
-the HTTP status, the Twilio-shape error code, and the parsed response body:
+the HTTP status, the Twilio-compatible error code, and the parsed response body:
 
 ```ruby
 begin

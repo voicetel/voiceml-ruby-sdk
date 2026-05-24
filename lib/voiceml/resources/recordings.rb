@@ -16,9 +16,14 @@ module VoiceML
       'DateCreated>'  => :date_created_gt,
       'CallSid'       => :call_sid,
       'ConferenceSid' => :conference_sid,
+      'IncludeSoftDeleted' => :include_soft_deleted,
       'Page'          => :page,
       'PageSize'      => :page_size,
       'PageToken'     => :page_token
+    }.freeze
+
+    GET_FIELDS = {
+      'IncludeSoftDeleted' => :include_soft_deleted
     }.freeze
 
     # @return [VoiceML::RecordingList]
@@ -30,8 +35,11 @@ module VoiceML
 
     # Fetch the metadata JSON for a recording.
     # @return [VoiceML::Recording]
-    def get(recording_sid)
-      Recording.from_hash(@transport.request(:get, path('Recordings', recording_sid)))
+    def get(recording_sid, **kwargs)
+      params = form_params(GET_FIELDS, kwargs)
+      Recording.from_hash(
+        @transport.request(:get, path('Recordings', recording_sid), params: params.empty? ? nil : params)
+      )
     end
 
     # Fetch the WAV audio for a recording.

@@ -6,7 +6,7 @@ require_relative '../models/incoming_phone_numbers'
 module VoiceML
   # Operations on `/IncomingPhoneNumbers` — tenant-scoped DID lookup and routing.
   #
-  # Twilio-shape: `sid` is the canonical `PN`-prefixed identifier, `phone_number` is the
+  # Twilio-compatible: `sid` is the canonical `PN`-prefixed identifier, `phone_number` is the
   # E.164 form. The standard lookup-by-number pattern (`list(phone_number: '+1...')`
   # returning a 0-or-1-row envelope, then `get(sid)`) is supported.
   class IncomingPhoneNumbersResource < BaseResource
@@ -32,6 +32,16 @@ module VoiceML
       'VoiceFallbackUrl'    => :voice_fallback_url,
       'VoiceFallbackMethod' => :voice_fallback_method,
       'FriendlyName'        => :friendly_name
+    }.freeze
+
+    LIST_TYPED_FIELDS = {
+      'PhoneNumber'  => :phone_number,
+      'FriendlyName' => :friendly_name,
+      'Beta'         => :beta,
+      'Origin'       => :origin,
+      'Page'         => :page,
+      'PageSize'     => :page_size,
+      'PageToken'    => :page_token
     }.freeze
 
     # List DIDs assigned to the authenticated tenant.
@@ -101,6 +111,52 @@ module VoiceML
     def delete(sid)
       @transport.request(:delete, path('IncomingPhoneNumbers', sid))
       nil
+    end
+
+    # @return [VoiceML::IncomingPhoneNumberList]
+    def list_local(**kwargs)
+      list_typed('Local', kwargs)
+    end
+
+    # @return [VoiceML::IncomingPhoneNumber]
+    def create_local(**kwargs)
+      create_typed('Local', kwargs)
+    end
+
+    # @return [VoiceML::IncomingPhoneNumberList]
+    def list_mobile(**kwargs)
+      list_typed('Mobile', kwargs)
+    end
+
+    # @return [VoiceML::IncomingPhoneNumber]
+    def create_mobile(**kwargs)
+      create_typed('Mobile', kwargs)
+    end
+
+    # @return [VoiceML::IncomingPhoneNumberList]
+    def list_toll_free(**kwargs)
+      list_typed('TollFree', kwargs)
+    end
+
+    # @return [VoiceML::IncomingPhoneNumber]
+    def create_toll_free(**kwargs)
+      create_typed('TollFree', kwargs)
+    end
+
+    private
+
+    def list_typed(kind, kwargs)
+      IncomingPhoneNumberList.from_hash(
+        @transport.request(:get, path('IncomingPhoneNumbers', kind),
+                           params: form_params(LIST_TYPED_FIELDS, kwargs))
+      )
+    end
+
+    def create_typed(kind, kwargs)
+      IncomingPhoneNumber.from_hash(
+        @transport.request(:post, path('IncomingPhoneNumbers', kind),
+                           form: form_params(CREATE_FIELDS, kwargs))
+      )
     end
   end
 end

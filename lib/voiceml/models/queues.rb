@@ -3,7 +3,7 @@
 require_relative 'common'
 
 module VoiceML
-  # A Twilio-shape Queue resource.
+  # A Twilio-compatible Queue resource.
   class Queue
     ATTRIBUTES = %w[
       sid account_sid friendly_name current_size max_size

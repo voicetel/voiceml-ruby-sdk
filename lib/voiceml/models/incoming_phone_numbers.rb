@@ -3,7 +3,7 @@
 require_relative 'common'
 
 module VoiceML
-  # A Twilio-shape IncomingPhoneNumber — a DID assigned to the tenant.
+  # A Twilio-compatible IncomingPhoneNumber — a DID assigned to the tenant.
   #
   # `sid` is the canonical `PN`-prefixed identifier (34 chars); `phone_number` carries the
   # E.164 form. These are distinct fields — twilio-ruby callers that lookup-by-number then

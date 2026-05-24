@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module VoiceML
-  # Twilio-shape pagination envelope fields. Mix into list-response classes to expose
+  # Twilio-compatible pagination envelope fields. Mix into list-response classes to expose
   # `page`, `page_size`, `total`, `next_page_uri`, `previous_page_uri`, `first_page_uri`,
   # `uri`, `num_pages`, `start`, `end`. The list items themselves are declared on each
   # concrete subclass (`calls`, `conferences`, etc).
@@ -22,7 +22,7 @@ module VoiceML
     end
   end
 
-  # Twilio-shape error body. Surface only — the transport raises a VoiceML::ApiError
+  # Twilio-compatible error body. Surface only — the transport raises a VoiceML::ApiError
   # subclass with this payload attached as `error.body`.
   class ErrorBody
     attr_reader :code, :message, :more_info, :status

@@ -9,9 +9,9 @@ module VoiceML
 
   # Raised when the API returns a non-2xx response.
   #
-  # The Twilio-shape error body (`{ code, message, more_info, status }`) is parsed into
+  # The Twilio-compatible error body (`{ code, message, more_info, status }`) is parsed into
   # `#code`, `#message`, and `#more_info` when present, with the raw payload exposed on
-  # `#body`. `#more_info` is the canonical Twilio docs URL for the error code (e.g.
+  # `#body`. `#more_info` is the Twilio documentation URL for the error code (e.g.
   # `https://www.twilio.com/docs/errors/20404`).
   class ApiError < Error
     attr_reader :status_code, :code, :body, :more_info

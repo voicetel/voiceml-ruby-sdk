@@ -3,7 +3,7 @@
 require_relative 'common'
 
 module VoiceML
-  # A Twilio-shape Recording resource.
+  # A Twilio-compatible Recording resource.
   class Recording
     ATTRIBUTES = %w[
       sid account_sid call_sid conference_sid status source channels

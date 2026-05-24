@@ -3,7 +3,7 @@
 require_relative 'common'
 
 module VoiceML
-  # A Twilio-shape Conference resource.
+  # A Twilio-compatible Conference resource.
   class Conference
     ATTRIBUTES = %w[
       sid account_sid friendly_name status region api_version uri
