@@ -31,7 +31,7 @@ module VoiceML
 
     def initialize(account_sid:, api_key:, base_url: DEFAULT_BASE_URL,
                    timeout: DEFAULT_TIMEOUT, max_retries: DEFAULT_MAX_RETRIES,
-                   user_agent: nil)
+                   user_agent: nil, http_client: nil)
       raise ConfigurationError, 'account_sid is required' if account_sid.nil? || account_sid.empty?
       raise ConfigurationError, 'api_key is required'     if api_key.nil? || api_key.empty?
       raise ConfigurationError, 'max_retries must be >= 0' if max_retries.negative?
@@ -43,6 +43,16 @@ module VoiceML
       @max_retries = max_retries
       @user_agent  = user_agent || "voiceml-ruby/#{VoiceML::VERSION}"
       @uri_base    = URI.parse(@base_url)
+      @conn_mutex  = Mutex.new
+      @owns_client = http_client.nil?
+      @persistent  = http_client
+    end
+
+    # Close the persistent connection, releasing the underlying socket.
+    # Safe to call multiple times. The transport remains usable — the next
+    # request will transparently open a fresh connection.
+    def close
+      @conn_mutex.synchronize { finish_connection } if @owns_client
     end
 
     # Perform a request. Pass `form:` for a form-urlencoded POST body, `json:` for a JSON body,
@@ -85,7 +95,7 @@ module VoiceML
 
         req = Net::HTTP::Get.new(uri)
         apply_common_headers(req, auth: !visited.any? { |u| u.host != uri.host })
-        response = http(uri).start { |h| h.request(req) }
+        response = send_on_persistent(uri, req)
 
         case response
         when Net::HTTPRedirection
@@ -96,7 +106,6 @@ module VoiceML
           headers = response.each_header.to_h
           return [response.code.to_i, response.body || '', headers]
         else
-          # Non-2xx, non-redirect — surface as the normal error path.
           raise_for_response(response)
         end
       end
@@ -170,7 +179,7 @@ module VoiceML
         req.body = encode_form(form)
       end
 
-      http(uri).start { |h| h.request(req) }
+      send_on_persistent(uri, req)
     end
 
     def build_net_request(method, uri)
@@ -191,12 +200,35 @@ module VoiceML
       req.basic_auth(@account_sid, @api_key) if auth
     end
 
-    def http(uri)
-      h = Net::HTTP.new(uri.host, uri.port)
-      h.use_ssl     = uri.scheme == 'https'
-      h.open_timeout = @timeout
-      h.read_timeout = @timeout
-      h
+    def send_on_persistent(uri, req)
+      conn = persistent_connection(uri)
+      conn.request(req)
+    rescue IOError, Errno::EPIPE, Errno::ECONNRESET
+      @conn_mutex.synchronize { finish_connection }
+      persistent_connection(uri).request(req)
+    end
+
+    def persistent_connection(uri)
+      @conn_mutex.synchronize do
+        if @persistent&.started? &&
+           @persistent.address == uri.host &&
+           @persistent.port == uri.port
+          return @persistent
+        end
+        finish_connection
+        h = Net::HTTP.new(uri.host, uri.port)
+        h.use_ssl = uri.scheme == 'https'
+        h.open_timeout = @timeout
+        h.read_timeout = @timeout
+        h.keep_alive_timeout = 30
+        h.start
+        @persistent = h
+      end
+    end
+
+    def finish_connection
+      @persistent&.finish rescue nil
+      @persistent = nil
     end
 
     def parse_response(response)

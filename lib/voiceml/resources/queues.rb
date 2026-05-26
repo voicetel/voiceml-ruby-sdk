@@ -42,6 +42,20 @@ module VoiceML
       )
     end
 
+    # @yield [VoiceML::Queue]
+    # @return [Enumerator<VoiceML::Queue>] when no block given
+    def each(**kwargs, &block)
+      return enum_for(:each, **kwargs) unless block
+
+      page_num = kwargs.delete(:page) || 0
+      loop do
+        chunk = list(**kwargs, page: page_num)
+        chunk.queues.each(&block)
+        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.queues.empty?
+        page_num += 1
+      end
+    end
+
     # @return [VoiceML::Queue]
     def get(queue_sid)
       Queue.from_hash(@transport.request(:get, path('Queues', queue_sid)))

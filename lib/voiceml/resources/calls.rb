@@ -153,6 +153,23 @@ module VoiceML
       CallList.from_hash(data)
     end
 
+    # Walk every page of /Calls and yield each Call. Returns an Enumerator when
+    # called without a block.
+    #
+    # @yield [VoiceML::Call]
+    # @return [Enumerator<VoiceML::Call>] when no block given
+    def each(**kwargs, &block)
+      return enum_for(:each, **kwargs) unless block
+
+      page_num = kwargs.delete(:page) || 0
+      loop do
+        chunk = list(**kwargs, page: page_num)
+        chunk.calls.each(&block)
+        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.calls.empty?
+        page_num += 1
+      end
+    end
+
     # Create a new outbound call.
     #
     # Pass at most one of `url:` / `twiml:` / `application_sid:` (Twiml wins if multiple are set

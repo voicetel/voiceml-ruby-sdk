@@ -33,6 +33,20 @@ module VoiceML
       )
     end
 
+    # @yield [VoiceML::Recording]
+    # @return [Enumerator<VoiceML::Recording>] when no block given
+    def each(**kwargs, &block)
+      return enum_for(:each, **kwargs) unless block
+
+      page_num = kwargs.delete(:page) || 0
+      loop do
+        chunk = list(**kwargs, page: page_num)
+        chunk.recordings.each(&block)
+        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.recordings.empty?
+        page_num += 1
+      end
+    end
+
     # Fetch the metadata JSON for a recording.
     # @return [VoiceML::Recording]
     def get(recording_sid, **kwargs)

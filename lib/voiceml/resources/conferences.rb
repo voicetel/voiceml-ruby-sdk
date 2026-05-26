@@ -68,6 +68,20 @@ module VoiceML
       )
     end
 
+    # @yield [VoiceML::Conference]
+    # @return [Enumerator<VoiceML::Conference>] when no block given
+    def each(**kwargs, &block)
+      return enum_for(:each, **kwargs) unless block
+
+      page_num = kwargs.delete(:page) || 0
+      loop do
+        chunk = list(**kwargs, page: page_num)
+        chunk.conferences.each(&block)
+        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.conferences.empty?
+        page_num += 1
+      end
+    end
+
     # @return [VoiceML::Conference]
     def get(conference_sid)
       Conference.from_hash(@transport.request(:get, path('Conferences', conference_sid)))

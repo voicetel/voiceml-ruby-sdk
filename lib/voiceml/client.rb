@@ -43,7 +43,7 @@ module VoiceML
                    base_url: Transport::DEFAULT_BASE_URL,
                    timeout: Transport::DEFAULT_TIMEOUT,
                    max_retries: Transport::DEFAULT_MAX_RETRIES,
-                   user_agent: nil)
+                   user_agent: nil, http_client: nil)
       if !api_key.nil? && !auth_token.nil?
         raise ArgumentError, 'pass either api_key: or auth_token:, not both'
       end
@@ -56,7 +56,8 @@ module VoiceML
         base_url:    base_url,
         timeout:     timeout,
         max_retries: max_retries,
-        user_agent:  user_agent
+        user_agent:  user_agent,
+        http_client: http_client
       )
 
       @calls                  = CallsResource.new(@transport)
