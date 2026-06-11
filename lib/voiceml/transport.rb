@@ -27,6 +27,14 @@ module VoiceML
     DEFAULT_MAX_RETRIES = 2
     RETRYABLE_STATUSES  = [429, 500, 502, 503, 504].freeze
 
+    # Linear-time trailing-slash strip. Equivalent to `base_url.sub(%r{/+\z}, '')` but
+    # without the polynomial-backtracking shape CodeQL flags (`rb/polynomial-redos`).
+    def self.strip_trailing_slashes(s)
+      i = s.length
+      i -= 1 while i.positive? && s.getbyte(i - 1) == 47 # '/'
+      i == s.length ? s : s[0, i]
+    end
+
     attr_reader :account_sid, :base_url, :max_retries, :timeout, :user_agent
 
     def initialize(account_sid:, api_key:, base_url: DEFAULT_BASE_URL,
@@ -38,7 +46,7 @@ module VoiceML
 
       @account_sid = account_sid
       @api_key     = api_key
-      @base_url    = base_url.sub(%r{/+\z}, '')
+      @base_url    = self.class.strip_trailing_slashes(base_url)
       @timeout     = timeout
       @max_retries = max_retries
       @user_agent  = user_agent || "voiceml-ruby/#{VoiceML::VERSION}"
