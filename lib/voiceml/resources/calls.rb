@@ -7,6 +7,7 @@ require_relative '../models/streams'
 require_relative '../models/siprec'
 require_relative '../models/transcriptions'
 require_relative '../models/diagnostics'
+require_relative '../models/payments'
 
 module VoiceML
   # Operations on `/Calls` and call-scoped sub-resources (Recordings, Streams, Siprec,
@@ -145,6 +146,34 @@ module VoiceML
       'StatusCallback'       => :status_callback,
       'StatusCallbackMethod' => :status_callback_method,
       'StatusCallbackEvents' => :status_callback_events
+    }.freeze
+
+    START_PAYMENT_FIELDS = {
+      'IdempotencyKey'         => :idempotency_key,
+      'StatusCallback'         => :status_callback,
+      'BankAccountType'        => :bank_account_type,
+      'ChargeAmount'           => :charge_amount,
+      'Currency'               => :currency,
+      'Description'            => :description,
+      'Input'                  => :input,
+      'MinPostalCodeLength'    => :min_postal_code_length,
+      'Parameter'              => :parameter,
+      'PaymentConnector'       => :payment_connector,
+      'PaymentMethod'          => :payment_method,
+      'PostalCode'             => :postal_code,
+      'SecurityCode'           => :security_code,
+      'Timeout'                => :timeout,
+      'TokenType'              => :token_type,
+      'ValidCardTypes'         => :valid_card_types,
+      'RequireMatchingInputs'  => :require_matching_inputs,
+      'Confirmation'           => :confirmation
+    }.freeze
+
+    UPDATE_PAYMENT_FIELDS = {
+      'IdempotencyKey' => :idempotency_key,
+      'StatusCallback' => :status_callback,
+      'Capture'        => :capture,
+      'Status'         => :status
     }.freeze
 
     # @return [VoiceML::CallList]
@@ -352,6 +381,34 @@ module VoiceML
     def send_user_defined_message(call_sid, payload = nil)
       @transport.request(:post, path('Calls', call_sid, 'UserDefinedMessages'),
                          form: payload)
+    end
+
+    # --- Payments (the REST companion to the `<Pay>` TwiML verb) ---
+
+    # Begin a `<Pay>` session on the live call. Returns the freshly-minted
+    # CallPayment. Returns 403 when the tenant is not `pay_enabled` or has no
+    # `stripe_secret_key` configured.
+    #
+    # `idempotency_key:` is accepted and persisted for diagnostic visibility but
+    # replay-dedup is NOT enforced today.
+    #
+    # @return [VoiceML::CallPayment]
+    def start_payment(call_sid, **kwargs)
+      data = @transport.request(:post, path('Calls', call_sid, 'Payments'),
+                                form: form_params(START_PAYMENT_FIELDS, kwargs))
+      CallPayment.from_hash(data)
+    end
+
+    # Advance or terminate an existing Pay session. `status: "complete"`
+    # captures the collected fields; `status: "cancel"` aborts the session.
+    # `capture: ...` tells the runtime which input the user is about to type
+    # next.
+    #
+    # @return [VoiceML::CallPayment]
+    def update_payment(call_sid, payment_sid, **kwargs)
+      data = @transport.request(:post, path('Calls', call_sid, 'Payments', payment_sid),
+                                form: form_params(UPDATE_PAYMENT_FIELDS, kwargs))
+      CallPayment.from_hash(data)
     end
   end
 end

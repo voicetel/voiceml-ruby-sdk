@@ -34,10 +34,6 @@ SKIP_OPS = %w[
   ListNotification
   FetchNotification
   CreateUserDefinedMessage
-  CreateMessage
-  FetchMessage
-  ListMessage
-  UpdateMessage
 ].to_set
 
 def load_conformance_entries
@@ -110,6 +106,10 @@ def conformance_target(op_id) # rubocop:disable Metrics/AbcSize, Metrics/Cycloma
     [VoiceML::SiprecSession, %w[sid account_sid call_sid]]
   when 'CreateRealtimeTranscription', 'UpdateRealtimeTranscription'
     [VoiceML::CallTranscription, %w[sid account_sid call_sid]]
+  when 'CreateMessage', 'FetchMessage', 'UpdateMessage'
+    [VoiceML::Message, %w[sid account_sid]]
+  when 'ListMessage'
+    [VoiceML::MessageList, %w[uri]]
   end
 end
 

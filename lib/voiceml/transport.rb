@@ -239,7 +239,7 @@ module VoiceML
         begin
           return JSON.parse(response.body)
         rescue JSON::ParserError => e
-          raise ApiError.new("non-JSON success response: #{response.body.to_s[0, 200]}",
+          raise ApiError.new("non-JSON success response (#{e.message}): #{response.body.to_s[0, 200]}",
                              status_code: status, body: response.body)
         end
       end

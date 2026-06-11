@@ -9,6 +9,7 @@ require_relative 'resources/recordings'
 require_relative 'resources/incoming_phone_numbers'
 require_relative 'resources/notifications'
 require_relative 'resources/diagnostics'
+require_relative 'resources/messages'
 
 module VoiceML
   # Synchronous client for the VoiceML REST API.
@@ -27,7 +28,7 @@ module VoiceML
   #   puts call.sid, call.status
   class Client
     attr_reader :calls, :conferences, :queues, :applications, :recordings,
-                :incoming_phone_numbers, :notifications, :diagnostics
+                :incoming_phone_numbers, :notifications, :diagnostics, :messages
 
     # @param account_sid [String] Twilio-format AccountSid (`AC` + 32 hex).
     # @param api_key     [String, nil] per-tenant API key. Pass either `api_key:` or the
@@ -68,6 +69,7 @@ module VoiceML
       @incoming_phone_numbers = IncomingPhoneNumbersResource.new(@transport)
       @notifications          = NotificationsResource.new(@transport)
       @diagnostics            = DiagnosticsResource.new(@transport)
+      @messages               = MessagesResource.new(@transport)
     end
 
     def account_sid
