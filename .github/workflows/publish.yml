@@ -1,18 +1,19 @@
 name: Publish to RubyGems
 
 # Publishes the voiceml gem to rubygems.org on every v* tag push.
-# Uses an API key stored as the RUBYGEMS_API_KEY secret at
-# https://github.com/voicetel/voiceml-ruby-sdk/settings/secrets/actions
+# Uses RubyGems Trusted Publishing (OIDC) — no long-lived API key.
 #
-# To create the key:
-#   1. Sign in at rubygems.org as the publisher account.
-#   2. Edit Profile → API Keys → Create.
-#   3. Scope: `Push rubygem` (and optionally restrict to `voiceml`).
-#   4. Copy the key into the RUBYGEMS_API_KEY repo secret.
+# One-time setup (already done):
+#   https://rubygems.org/profile/oidc/pending_trusted_publishers
+#   - RubyGem Name: voiceml
+#   - Repository Owner: voicetel
+#   - Repository Name: voiceml-ruby-sdk
+#   - Workflow Filename: publish.yml
+#   - Environment: (blank)
 #
-# Migration note: RubyGems supports Trusted Publishing (OIDC) since
-# late 2024 — when ready, replace the API-key block with the OIDC
-# flow per https://guides.rubygems.org/trusted-publishing/
+# The first successful publish promotes the pending publisher to a
+# live trusted publisher and claims the gem name under this account.
+# Subsequent publishes reuse the same trust grant.
 
 on:
   push:
@@ -21,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -35,17 +37,11 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      - name: Configure RubyGems credentials via OIDC
+        uses: rubygems/configure-rubygems-credentials@v1.0.0
+
       - name: Build gem
         run: gem build voiceml.gemspec
 
       - name: Publish to RubyGems
-        env:
-          RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
-        run: |
-          mkdir -p ~/.gem
-          umask 077
-          cat > ~/.gem/credentials <<EOF
-          ---
-          :rubygems_api_key: ${RUBYGEMS_API_KEY}
-          EOF
-          gem push voiceml-*.gem
+        run: gem push voiceml-*.gem
