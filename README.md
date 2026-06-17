@@ -2,7 +2,7 @@
 
 The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/api/v0.7/voiceml/) — Twilio-compatible outbound voice and answering-machine-detection from VoiceTel, with idiomatic snake_case kwargs, structured errors, and a Twilio-compatible wire format.
 
-![Version](https://img.shields.io/badge/version-0.7.1.1-blue)
+![Version](https://img.shields.io/badge/version-0.8.1-blue)
 ![Ruby](https://img.shields.io/badge/ruby-3.0%2B-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Tests](https://img.shields.io/badge/tests-65%20specs-brightgreen)
@@ -47,10 +47,12 @@ The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/ap
 - **Messages** — create, fetch, list (To/From/DateSent filters + pagination), update (Body redaction; Status=canceled), delete.
 - **IncomingPhoneNumbers** — list, fetch, update.
 - **Notifications** — fetch, list.
+- **SIP** — SIP Trunking: Domains (CRUD), CredentialLists + Credentials (CRUD), IpAccessControlLists + IpAddresses (CRUD), Domain↔ACL/CredentialList mappings (historical, Auth/Calls, Auth/Registrations namespaces).
+- **Routes V2** — Twilio Inbound Processing Region API: `client.routes_v2.sip_domains.fetch(name)` / `update(name, voice_region:, friendly_name:)`.
 - **Diagnostics** — `/health` deep probe, OpenAPI spec.
 
 ### 🧪 Tested
-- **65 specs** with mocked HTTP layer (`webmock`) covering every resource and pagination edge cases — spec drift gets caught at parse time.
+- **81 specs** with mocked HTTP layer (`webmock`) covering every resource and pagination edge cases — spec drift gets caught at parse time.
 - Integration smoke spec gated by env vars — safe for CI.
 
 ### 📦 Clean Distribution
