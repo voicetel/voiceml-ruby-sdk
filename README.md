@@ -1,6 +1,6 @@
 # 📞 VoiceML Ruby SDK
 
-The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/api/v0.7/voiceml/) — Twilio-compatible outbound voice and answering-machine-detection from VoiceTel, with idiomatic snake_case kwargs, structured errors, and a Twilio-compatible wire format.
+The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/api/v0.8/voiceml/) — Twilio-compatible outbound voice and answering-machine-detection from VoiceTel, with idiomatic snake_case kwargs, structured errors, and a Twilio-compatible wire format.
 
 ![Version](https://img.shields.io/badge/version-0.8.1-blue)
 ![Ruby](https://img.shields.io/badge/ruby-3.0%2B-red)
@@ -110,7 +110,7 @@ client = VoiceML::Client.new(account_sid: 'AC...', api_key: '...')
 client.diagnostics.health  # uses your AccountSid + key on every call
 ```
 
-> Don't have credentials yet? See **[voicetel.com/docs/api/v0.7/voiceml/](https://voicetel.com/docs/api/v0.7/voiceml/)** for issuance and rotation.
+> Don't have credentials yet? See **[voicetel.com/docs/api/v0.8/voiceml/](https://voicetel.com/docs/api/v0.8/voiceml/)** for issuance and rotation.
 
 ## 🗺️ Resource Reference
 
@@ -245,7 +245,7 @@ gem build voiceml.gemspec
 
 ## 📖 API Documentation
 
-- **Reference docs:** [voicetel.com/docs/api/v0.7/voiceml/](https://voicetel.com/docs/api/v0.7/voiceml/)
+- **Reference docs:** [voicetel.com/docs/api/v0.8/voiceml/](https://voicetel.com/docs/api/v0.8/voiceml/)
 - **Validator:** [voicetel.com/voiceml/validator/](https://voicetel.com/voiceml/validator/)
 - **SDK catalogue:** [voicetel.com/docs/voiceml-sdks/](https://voicetel.com/docs/voiceml-sdks/)
 - **YARD comments:** every resource method carries `@param` / `@return` docs — `yard doc lib` builds them locally.
