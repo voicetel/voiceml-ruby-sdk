@@ -37,6 +37,7 @@ module VoiceML
       assign_page_fields(hash)
       @domains = (hash['domains'] || []).map { |h| SipDomain.from_hash(h) }
     end
+    def self.from_hash(hash); new(hash || {}); end
   end
 
   # SipCredentialList — `CL...`.
@@ -58,6 +59,7 @@ module VoiceML
       assign_page_fields(hash)
       @credential_lists = (hash['credential_lists'] || []).map { |h| SipCredentialList.from_hash(h) }
     end
+    def self.from_hash(hash); new(hash || {}); end
   end
 
   # SipCredential — `CR...`. Password is write-only (never returned).
@@ -82,6 +84,7 @@ module VoiceML
       assign_page_fields(hash)
       @credentials = (hash['credentials'] || []).map { |h| SipCredential.from_hash(h) }
     end
+    def self.from_hash(hash); new(hash || {}); end
   end
 
   # SipIpAccessControlList — `AL...`.
@@ -103,6 +106,7 @@ module VoiceML
       assign_page_fields(hash)
       @ip_access_control_lists = (hash['ip_access_control_lists'] || []).map { |h| SipIpAccessControlList.from_hash(h) }
     end
+    def self.from_hash(hash); new(hash || {}); end
   end
 
   # SipIpAddress — `IP...`.
@@ -126,6 +130,7 @@ module VoiceML
       assign_page_fields(hash)
       @ip_addresses = (hash['ip_addresses'] || []).map { |h| SipIpAddress.from_hash(h) }
     end
+    def self.from_hash(hash); new(hash || {}); end
   end
 
   # SipDomainMapping — round-trip shape for every domain mapping sub-resource.
@@ -149,6 +154,7 @@ module VoiceML
       assign_page_fields(hash)
       @credential_list_mappings = (hash['credential_list_mappings'] || []).map { |h| SipDomainMapping.from_hash(h) }
     end
+    def self.from_hash(hash); new(hash || {}); end
   end
 
   class SipIpAccessControlListMappingList
@@ -158,5 +164,21 @@ module VoiceML
       assign_page_fields(hash)
       @ip_access_control_list_mappings = (hash['ip_access_control_list_mappings'] || []).map { |h| SipDomainMapping.from_hash(h) }
     end
+    def self.from_hash(hash); new(hash || {}); end
+  end
+
+  # SipAuthMappingList — page envelope used by all four `/Auth/*` mapping list
+  # endpoints. Twilio's spec uses a generic `contents` envelope key here (not
+  # `credential_list_mappings` / `ip_access_control_list_mappings`) because
+  # the same list shape is reused across CredentialList and IpAccessControlList
+  # auth mappings; the inner items decode as SipDomainMapping either way.
+  class SipAuthMappingList
+    include Pageable
+    attr_reader :contents
+    def initialize(hash = {})
+      assign_page_fields(hash)
+      @contents = (hash['contents'] || []).map { |h| SipDomainMapping.from_hash(h) }
+    end
+    def self.from_hash(hash); new(hash || {}); end
   end
 end

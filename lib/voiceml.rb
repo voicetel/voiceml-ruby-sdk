@@ -25,3 +25,14 @@ require_relative 'voiceml/version'
 require_relative 'voiceml/errors'
 require_relative 'voiceml/transport'
 require_relative 'voiceml/client'
+
+# Model-only resources — surfaces that voiceml runs as Twilio-compat stubs
+# (no first-class client.* getter yet) but still need decodable Ruby classes
+# for response-shape conformance and migration tooling. Resource files
+# require their own models; these are the standalone ones.
+require_relative 'voiceml/models/accounts'
+require_relative 'voiceml/models/outgoing_caller_ids'
+require_relative 'voiceml/models/media'
+require_relative 'voiceml/models/notifications'
+require_relative 'voiceml/models/user_defined_messages'
+require_relative 'voiceml/models/assistants_v1'

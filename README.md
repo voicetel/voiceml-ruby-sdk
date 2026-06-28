@@ -2,7 +2,7 @@
 
 The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/api/v0.8/voiceml/) — Twilio-compatible outbound voice and answering-machine-detection from VoiceTel, with idiomatic snake_case kwargs, structured errors, and a Twilio-compatible wire format.
 
-![Version](https://img.shields.io/badge/version-0.8.1-blue)
+![Version](https://img.shields.io/badge/version-0.9.1-blue)
 ![Ruby](https://img.shields.io/badge/ruby-3.0%2B-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Tests](https://img.shields.io/badge/tests-65%20specs-brightgreen)
