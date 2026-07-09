@@ -66,10 +66,14 @@ module VoiceML
     # Perform a request. Pass `form:` for a form-urlencoded POST body, `json:` for a JSON body,
     # or neither for a plain GET/DELETE. `params:` are query-string params.
     #
+    # `base_url:` overrides the client's default host for this one call (used to route product
+    # resources at their subdomain — Conversations, Messaging Service). When set, the request
+    # goes to an absolute URL so the correct host/SNI is used per request; see `ScopedTransport`.
+    #
     # @return [Hash, Array, nil] the parsed JSON body (or `nil` for empty 2xx).
     # @raise [VoiceML::ApiError] for non-2xx responses (subclasses by status family).
-    def request(method, path, params: nil, form: nil, json: nil)
-      uri = build_uri(path, params)
+    def request(method, path, params: nil, form: nil, json: nil, base_url: nil)
+      uri = build_uri(request_path(path, base_url), params)
 
       attempt = 0
       loop do
@@ -95,8 +99,8 @@ module VoiceML
     # redirect that `GET /Recordings/{sid}.wav` issues when audio has been archived.
     #
     # @return [Array(Integer, String, Hash)] status code, response body bytes, header hash.
-    def fetch_bytes(path)
-      uri = build_uri(path, nil)
+    def fetch_bytes(path, base_url: nil)
+      uri = build_uri(request_path(path, base_url), nil)
       visited = []
       loop do
         raise ApiError.new('too many redirects', status_code: 0) if visited.length > 5
@@ -124,6 +128,14 @@ module VoiceML
     def transport_errors
       [Net::OpenTimeout, Net::ReadTimeout, Errno::ECONNREFUSED, Errno::ECONNRESET,
        Errno::EHOSTUNREACH, SocketError, EOFError]
+    end
+
+    # Prefix `path` with a per-request `base_url` override, if any. Leaves absolute paths and
+    # the default-host case untouched so `build_uri` handles them as before.
+    def request_path(path, base_url)
+      return path if base_url.nil? || base_url.empty?
+
+      "#{base_url}#{path}"
     end
 
     def build_uri(path, params)
@@ -291,6 +303,34 @@ module VoiceML
         end
       end
       [8.0, 0.5 * (2**attempt)].min
+    end
+  end
+
+  # A transport view pinned to a specific product base URL.
+  #
+  # Wraps a real `Transport` and forwards every call, injecting a `base_url` override so an
+  # entire resource group lands on its product subdomain (`conversations.voicetel.com` /
+  # `messaging.voicetel.com`) without each resource needing to know its own host.
+  #
+  # @api private
+  class ScopedTransport
+    attr_reader :base_url
+
+    def initialize(inner, base_url)
+      @inner    = inner
+      @base_url = Transport.strip_trailing_slashes(base_url)
+    end
+
+    def account_sid
+      @inner.account_sid
+    end
+
+    def request(method, path, params: nil, form: nil, json: nil)
+      @inner.request(method, path, params: params, form: form, json: json, base_url: @base_url)
+    end
+
+    def fetch_bytes(path)
+      @inner.fetch_bytes(path, base_url: @base_url)
     end
   end
 end

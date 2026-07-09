@@ -39,8 +39,8 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
   end
 
   describe 'VoiceML::VERSION' do
-    it 'reports 0.9.0' do
-      expect(VoiceML::VERSION).to eq('0.9.1')
+    it 'reports 0.9.2' do
+      expect(VoiceML::VERSION).to eq('0.9.2')
     end
   end
 

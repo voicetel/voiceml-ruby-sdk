@@ -1,11 +1,11 @@
 # 📞 VoiceML Ruby SDK
 
-The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/api/v0.8/voiceml/) — Twilio-compatible outbound voice and answering-machine-detection from VoiceTel, with idiomatic snake_case kwargs, structured errors, and a Twilio-compatible wire format.
+The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/api/v0.9/voiceml/) — Twilio-compatible outbound voice and answering-machine-detection from VoiceTel, with idiomatic snake_case kwargs, structured errors, and a Twilio-compatible wire format.
 
-![Version](https://img.shields.io/badge/version-0.9.1-blue)
+![Version](https://img.shields.io/badge/version-0.9.2-blue)
 ![Ruby](https://img.shields.io/badge/ruby-3.0%2B-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
-![Tests](https://img.shields.io/badge/tests-65%20specs-brightgreen)
+![Tests](https://img.shields.io/badge/tests-188%20examples-brightgreen)
 ![Gem](https://img.shields.io/badge/gem-voiceml-blue)
 
 ## 📚 Table of Contents
@@ -49,10 +49,15 @@ The official Ruby client for the [VoiceML REST API](https://voicetel.com/docs/ap
 - **Notifications** — fetch, list.
 - **SIP** — SIP Trunking: Domains (CRUD), CredentialLists + Credentials (CRUD), IpAccessControlLists + IpAddresses (CRUD), Domain↔ACL/CredentialList mappings (historical, Auth/Calls, Auth/Registrations namespaces).
 - **Routes V2** — Twilio Inbound Processing Region API: `client.routes_v2.sip_domains.fetch(name)` / `update(name, voice_region:, friendly_name:)`.
+- **Messaging Service** — `client.messaging_v1.services` CRUD (`MG...` services), routed automatically at the `messaging.voicetel.com` product host.
+- **Pricing** — read-only `client.pricing.v1` / `client.pricing.v2` for Voice, Messaging, PhoneNumbers, and Trunking country + number lookups.
 - **Diagnostics** — `/health` deep probe, OpenAPI spec.
 
+### 🌐 Per-product hosts
+VoiceML mirrors Twilio's product-per-subdomain model. The whole `conversations_v1` group is routed to `conversations.voicetel.com` and `messaging_v1` to `messaging.voicetel.com`, while everything else stays on the default `voiceml.voicetel.com`. These hosts are derived automatically from `base_url`; a non-`voicetel.com` base (e.g. a self-hosted instance) keeps every product on that single host. Override per product with `messaging_base_url:` / `conversations_base_url:` on the client constructor.
+
 ### 🧪 Tested
-- **81 specs** with mocked HTTP layer (`webmock`) covering every resource and pagination edge cases — spec drift gets caught at parse time.
+- **188 examples** with mocked HTTP layer (`webmock`) covering every resource and pagination edge cases — spec drift gets caught at parse time.
 - Integration smoke spec gated by env vars — safe for CI.
 
 ### 📦 Clean Distribution
@@ -110,7 +115,7 @@ client = VoiceML::Client.new(account_sid: 'AC...', api_key: '...')
 client.diagnostics.health  # uses your AccountSid + key on every call
 ```
 
-> Don't have credentials yet? See **[voicetel.com/docs/api/v0.8/voiceml/](https://voicetel.com/docs/api/v0.8/voiceml/)** for issuance and rotation.
+> Don't have credentials yet? See **[voicetel.com/docs/api/v0.9/voiceml/](https://voicetel.com/docs/api/v0.9/voiceml/)** for issuance and rotation.
 
 ## 🗺️ Resource Reference
 
@@ -124,6 +129,8 @@ client.diagnostics.health  # uses your AccountSid + key on every call
 | `client.messages` | create, fetch, list, update, delete | To/From/DateSent filters; Body redaction; Status=canceled |
 | `client.incoming_phone_numbers` | list, fetch, update | |
 | `client.notifications` | fetch, list | |
+| `client.messaging_v1.services` | create, list, fetch, update, delete | Messaging Service (`MG...`); routed at `messaging.voicetel.com` |
+| `client.pricing.v1` / `.v2` | countries.list / fetch, numbers.fetch | Voice, Messaging, PhoneNumbers, Trunking (read-only, default host) |
 | `client.diagnostics` | `/health`, OpenAPI spec | |
 
 Methods accept idiomatic snake_case keyword arguments — they're translated to Twilio's PascalCase wire field names internally:
@@ -245,7 +252,7 @@ gem build voiceml.gemspec
 
 ## 📖 API Documentation
 
-- **Reference docs:** [voicetel.com/docs/api/v0.8/voiceml/](https://voicetel.com/docs/api/v0.8/voiceml/)
+- **Reference docs:** [voicetel.com/docs/api/v0.9/voiceml/](https://voicetel.com/docs/api/v0.9/voiceml/)
 - **Validator:** [voicetel.com/voiceml/validator/](https://voicetel.com/voiceml/validator/)
 - **SDK catalogue:** [voicetel.com/docs/voiceml-sdks/](https://voicetel.com/docs/voiceml-sdks/)
 - **YARD comments:** every resource method carries `@param` / `@return` docs — `yard doc lib` builds them locally.
