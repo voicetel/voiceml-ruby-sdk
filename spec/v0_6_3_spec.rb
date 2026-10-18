@@ -114,7 +114,7 @@ RSpec.describe 'voiceml-ruby v0.6.3' do
         ))
         .to_return(
           status: 200,
-          body: { recordings: [], page: 0, page_size: 50, total: 0 }.to_json,
+          body: { recordings: [], page: 0, page_size: 50 }.to_json,
           headers: { 'Content-Type' => 'application/json' }
         )
 

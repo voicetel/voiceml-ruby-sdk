@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 require_relative '../models/assistants_v1'
 
 module VoiceML
@@ -63,6 +65,8 @@ module VoiceML
   # Fetch returns the AssistantWithToolsAndKnowledge shape (tools + knowledge inline).
   # ============================================================================
   class AssistantsV1AssistantsResource
+    include V1Pages
+    include FieldMapping
     CREATE_FIELDS = %i[name owner personality_prompt model customer_ai segment_credential].freeze
     UPDATE_FIELDS = %i[name owner personality_prompt model customer_ai segment_credential].freeze
 
@@ -81,39 +85,29 @@ module VoiceML
     def create(name:, **kwargs)
       kwargs[:name] = name
       AssistantsV1Assistant.from_hash(
-        @transport.request(:post, '/v1/Assistants', json: build_json(CREATE_FIELDS, kwargs))
+        @transport.request(:post, '/v1/Assistants', json: json_params(CREATE_FIELDS, kwargs))
       )
     end
 
     def fetch(id)
       AssistantsV1AssistantWithToolsAndKnowledge.from_hash(
-        @transport.request(:get, "/v1/Assistants/#{id}")
+        @transport.request(:get, "/v1/Assistants/#{encode_path_segment(id)}")
       )
     end
 
     def update(id, **kwargs)
       AssistantsV1Assistant.from_hash(
-        @transport.request(:put, "/v1/Assistants/#{id}", json: build_json(UPDATE_FIELDS, kwargs))
+        @transport.request(:put, "/v1/Assistants/#{encode_path_segment(id)}", json: json_params(UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete(id)
-      @transport.request(:delete, "/v1/Assistants/#{id}")
+      @transport.request(:delete, "/v1/Assistants/#{encode_path_segment(id)}")
       nil
     end
 
     private
 
-    def build_json(keys, kwargs)
-      out = {}
-      keys.each do |k|
-        v = kwargs[k]
-        next if v.nil?
-
-        out[k.to_s] = v
-      end
-      out
-    end
   end
 
   # ============================================================================
@@ -150,6 +144,8 @@ module VoiceML
 
   # /v1/Assistants/{id}/Tools — list attached + attach/detach single Tool.
   class AssistantsV1AssistantToolsScope
+    include V1Pages
+    include FieldMapping
     def initialize(transport, assistant_id)
       @transport    = transport
       @assistant_id = assistant_id
@@ -159,25 +155,27 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       AssistantsV1ToolList.new(
-        @transport.request(:get, "/v1/Assistants/#{@assistant_id}/Tools", params: params)
+        @transport.request(:get, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Tools", params: params)
       )
     end
 
     # POST /v1/Assistants/{id}/Tools/{toolId} — 204 No Content on success.
     def attach(tool_id)
-      @transport.request(:post, "/v1/Assistants/#{@assistant_id}/Tools/#{tool_id}")
+      @transport.request(:post, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Tools/#{encode_path_segment(tool_id)}")
       nil
     end
 
     # DELETE /v1/Assistants/{id}/Tools/{toolId} — 204 No Content on success.
     def detach(tool_id)
-      @transport.request(:delete, "/v1/Assistants/#{@assistant_id}/Tools/#{tool_id}")
+      @transport.request(:delete, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Tools/#{encode_path_segment(tool_id)}")
       nil
     end
   end
 
   # /v1/Assistants/{id}/Knowledge — list attached + attach/detach single Knowledge.
   class AssistantsV1AssistantKnowledgeScope
+    include V1Pages
+    include FieldMapping
     def initialize(transport, assistant_id)
       @transport    = transport
       @assistant_id = assistant_id
@@ -187,25 +185,27 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       AssistantsV1KnowledgeList.new(
-        @transport.request(:get, "/v1/Assistants/#{@assistant_id}/Knowledge", params: params)
+        @transport.request(:get, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Knowledge", params: params)
       )
     end
 
     # POST /v1/Assistants/{id}/Knowledge/{knowledgeId} — 204 No Content on success.
     def attach(knowledge_id)
-      @transport.request(:post, "/v1/Assistants/#{@assistant_id}/Knowledge/#{knowledge_id}")
+      @transport.request(:post, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Knowledge/#{encode_path_segment(knowledge_id)}")
       nil
     end
 
     # DELETE /v1/Assistants/{id}/Knowledge/{knowledgeId} — 204 No Content on success.
     def detach(knowledge_id)
-      @transport.request(:delete, "/v1/Assistants/#{@assistant_id}/Knowledge/#{knowledge_id}")
+      @transport.request(:delete, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Knowledge/#{encode_path_segment(knowledge_id)}")
       nil
     end
   end
 
   # /v1/Assistants/{id}/Feedbacks — list + create.
   class AssistantsV1AssistantFeedbacksScope
+    include V1Pages
+    include FieldMapping
     CREATE_FIELDS = %i[session_id message_id score text].freeze
 
     def initialize(transport, assistant_id)
@@ -217,34 +217,26 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       AssistantsV1FeedbackList.new(
-        @transport.request(:get, "/v1/Assistants/#{@assistant_id}/Feedbacks", params: params)
+        @transport.request(:get, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Feedbacks", params: params)
       )
     end
 
     def create(session_id:, **kwargs)
       kwargs[:session_id] = session_id
       AssistantsV1Feedback.from_hash(
-        @transport.request(:post, "/v1/Assistants/#{@assistant_id}/Feedbacks",
-                           json: build_json(CREATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Feedbacks",
+                           json: json_params(CREATE_FIELDS, kwargs))
       )
     end
 
     private
 
-    def build_json(keys, kwargs)
-      out = {}
-      keys.each do |k|
-        v = kwargs[k]
-        next if v.nil?
-
-        out[k.to_s] = v
-      end
-      out
-    end
   end
 
   # /v1/Assistants/{id}/Messages — send (create) a message; returns the model's reply.
   class AssistantsV1AssistantMessagesScope
+    include V1Pages
+    include FieldMapping
     CREATE_FIELDS = %i[identity body session_id webhook mode].freeze
 
     def initialize(transport, assistant_id)
@@ -256,23 +248,13 @@ module VoiceML
       kwargs[:identity] = identity
       kwargs[:body]     = body
       AssistantsV1SendMessageResponse.from_hash(
-        @transport.request(:post, "/v1/Assistants/#{@assistant_id}/Messages",
-                           json: build_json(CREATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Assistants/#{encode_path_segment(@assistant_id)}/Messages",
+                           json: json_params(CREATE_FIELDS, kwargs))
       )
     end
 
     private
 
-    def build_json(keys, kwargs)
-      out = {}
-      keys.each do |k|
-        v = kwargs[k]
-        next if v.nil?
-
-        out[k.to_s] = v
-      end
-      out
-    end
   end
 
   # ============================================================================
@@ -281,6 +263,8 @@ module VoiceML
   # Fetch returns the ToolWithPolicies shape (policies inline).
   # ============================================================================
   class AssistantsV1ToolsResource
+    include V1Pages
+    include FieldMapping
     CREATE_FIELDS = %i[name type enabled assistant_id description meta].freeze
     UPDATE_FIELDS = %i[name type enabled description meta].freeze
 
@@ -300,37 +284,27 @@ module VoiceML
       kwargs[:type]    = type
       kwargs[:enabled] = enabled
       AssistantsV1Tool.from_hash(
-        @transport.request(:post, '/v1/Tools', json: build_json(CREATE_FIELDS, kwargs))
+        @transport.request(:post, '/v1/Tools', json: json_params(CREATE_FIELDS, kwargs))
       )
     end
 
     def fetch(id)
-      AssistantsV1ToolWithPolicies.from_hash(@transport.request(:get, "/v1/Tools/#{id}"))
+      AssistantsV1ToolWithPolicies.from_hash(@transport.request(:get, "/v1/Tools/#{encode_path_segment(id)}"))
     end
 
     def update(id, **kwargs)
       AssistantsV1Tool.from_hash(
-        @transport.request(:put, "/v1/Tools/#{id}", json: build_json(UPDATE_FIELDS, kwargs))
+        @transport.request(:put, "/v1/Tools/#{encode_path_segment(id)}", json: json_params(UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete(id)
-      @transport.request(:delete, "/v1/Tools/#{id}")
+      @transport.request(:delete, "/v1/Tools/#{encode_path_segment(id)}")
       nil
     end
 
     private
 
-    def build_json(keys, kwargs)
-      out = {}
-      keys.each do |k|
-        v = kwargs[k]
-        next if v.nil?
-
-        out[k.to_s] = v
-      end
-      out
-    end
   end
 
   # ============================================================================
@@ -338,6 +312,8 @@ module VoiceML
   # `list` accepts an optional `assistant_id:` filter (wire name `AssistantId`).
   # ============================================================================
   class AssistantsV1KnowledgeResource
+    include V1Pages
+    include FieldMapping
     CREATE_FIELDS = %i[name type assistant_id description embedding_model knowledge_source_details].freeze
     UPDATE_FIELDS = %i[name type description embedding_model knowledge_source_details].freeze
 
@@ -356,37 +332,27 @@ module VoiceML
       kwargs[:name] = name
       kwargs[:type] = type
       AssistantsV1Knowledge.from_hash(
-        @transport.request(:post, '/v1/Knowledge', json: build_json(CREATE_FIELDS, kwargs))
+        @transport.request(:post, '/v1/Knowledge', json: json_params(CREATE_FIELDS, kwargs))
       )
     end
 
     def fetch(id)
-      AssistantsV1Knowledge.from_hash(@transport.request(:get, "/v1/Knowledge/#{id}"))
+      AssistantsV1Knowledge.from_hash(@transport.request(:get, "/v1/Knowledge/#{encode_path_segment(id)}"))
     end
 
     def update(id, **kwargs)
       AssistantsV1Knowledge.from_hash(
-        @transport.request(:put, "/v1/Knowledge/#{id}", json: build_json(UPDATE_FIELDS, kwargs))
+        @transport.request(:put, "/v1/Knowledge/#{encode_path_segment(id)}", json: json_params(UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete(id)
-      @transport.request(:delete, "/v1/Knowledge/#{id}")
+      @transport.request(:delete, "/v1/Knowledge/#{encode_path_segment(id)}")
       nil
     end
 
     private
 
-    def build_json(keys, kwargs)
-      out = {}
-      keys.each do |k|
-        v = kwargs[k]
-        next if v.nil?
-
-        out[k.to_s] = v
-      end
-      out
-    end
   end
 
   # ============================================================================
@@ -413,6 +379,8 @@ module VoiceML
 
   # /v1/Knowledge/{id}/Status — read-only ingestion status snapshot.
   class AssistantsV1KnowledgeStatusScope
+    include V1Pages
+    include FieldMapping
     def initialize(transport, knowledge_id)
       @transport    = transport
       @knowledge_id = knowledge_id
@@ -420,13 +388,15 @@ module VoiceML
 
     def fetch
       AssistantsV1KnowledgeStatus.from_hash(
-        @transport.request(:get, "/v1/Knowledge/#{@knowledge_id}/Status")
+        @transport.request(:get, "/v1/Knowledge/#{encode_path_segment(@knowledge_id)}/Status")
       )
     end
   end
 
   # /v1/Knowledge/{id}/Chunks — paged list of indexed chunks.
   class AssistantsV1KnowledgeChunksScope
+    include V1Pages
+    include FieldMapping
     def initialize(transport, knowledge_id)
       @transport    = transport
       @knowledge_id = knowledge_id
@@ -436,7 +406,7 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       AssistantsV1KnowledgeChunkList.new(
-        @transport.request(:get, "/v1/Knowledge/#{@knowledge_id}/Chunks", params: params)
+        @transport.request(:get, "/v1/Knowledge/#{encode_path_segment(@knowledge_id)}/Chunks", params: params)
       )
     end
   end
@@ -445,6 +415,8 @@ module VoiceML
   # /v1/Sessions — list + fetch on the top-level Session resource.
   # ============================================================================
   class AssistantsV1SessionsResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
@@ -456,7 +428,7 @@ module VoiceML
     end
 
     def fetch(id)
-      AssistantsV1Session.from_hash(@transport.request(:get, "/v1/Sessions/#{id}"))
+      AssistantsV1Session.from_hash(@transport.request(:get, "/v1/Sessions/#{encode_path_segment(id)}"))
     end
   end
 
@@ -475,6 +447,8 @@ module VoiceML
   end
 
   class AssistantsV1SessionMessagesScope
+    include V1Pages
+    include FieldMapping
     def initialize(transport, session_id)
       @transport  = transport
       @session_id = session_id
@@ -484,7 +458,7 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       AssistantsV1MessageList.new(
-        @transport.request(:get, "/v1/Sessions/#{@session_id}/Messages", params: params)
+        @transport.request(:get, "/v1/Sessions/#{encode_path_segment(@session_id)}/Messages", params: params)
       )
     end
   end
@@ -493,6 +467,8 @@ module VoiceML
   # /v1/Policies — read-only list, filterable by ToolId/KnowledgeId.
   # ============================================================================
   class AssistantsV1PoliciesResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end

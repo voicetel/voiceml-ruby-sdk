@@ -40,8 +40,8 @@ RSpec.describe VoiceML::Client do
         sid: call_sid,
         account_sid: ACCOUNT_SID,
         api_version: '2010-04-01',
-        to: '+18005551234',
-        from: '+18005550000',
+        to: '+14155550100',
+        from: '+14155550101',
         status: 'queued',
         direction: 'outbound-api',
         date_created: '2026-05-19T10:00:00Z',
@@ -59,8 +59,8 @@ RSpec.describe VoiceML::Client do
                  'Content-Type' => 'application/x-www-form-urlencoded'
                },
                body: hash_including(
-                 'To' => '+18005551234',
-                 'From' => '+18005550000',
+                 'To' => '+14155550100',
+                 'From' => '+14155550101',
                  'Url' => 'https://example.com/twiml',
                  'MachineDetection' => 'DetectMessageEnd'
                )
@@ -69,8 +69,8 @@ RSpec.describe VoiceML::Client do
                         headers: { 'Content-Type' => 'application/json' })
 
       call = client.calls.create(
-        to: '+18005551234',
-        from: '+18005550000',
+        to: '+14155550100',
+        from: '+14155550101',
         url: 'https://example.com/twiml',
         machine_detection: 'DetectMessageEnd'
       )
@@ -83,19 +83,19 @@ RSpec.describe VoiceML::Client do
   end
 
   describe 'calls.list' do
-    it 'serialises StartTime>= and StartTime<= as literal query names' do
+    it 'serialises the spec query names StartTime> and StartTime<' do
       stub = stub_request(:get, "#{base_url}#{accounts_path('Calls')}")
              .with(query: {
-                     'StartTime>=' => '2026-05-01T00:00:00Z',
-                     'StartTime<=' => '2026-05-19T00:00:00Z',
+                     'StartTime>' => '2026-05-01T00:00:00Z',
+                     'StartTime<' => '2026-05-19T00:00:00Z',
                      'PageSize' => '50'
                    })
              .to_return(status: 200, body: { calls: [], page: 0, page_size: 50 }.to_json,
                         headers: { 'Content-Type' => 'application/json' })
 
       result = client.calls.list(
-        start_time_gte: '2026-05-01T00:00:00Z',
-        start_time_lte: '2026-05-19T00:00:00Z',
+        start_time_gt: '2026-05-01T00:00:00Z',
+        start_time_lt: '2026-05-19T00:00:00Z',
         page_size: 50
       )
 
@@ -103,6 +103,12 @@ RSpec.describe VoiceML::Client do
       expect(result).to be_a(VoiceML::CallList)
       expect(result.calls).to eq([])
       expect(result.page_size).to eq(50)
+    end
+
+    it 'rejects the removed StartTime>=/StartTime<= filters with ArgumentError' do
+      expect do
+        client.calls.list(start_time_gte: '2026-05-01T00:00:00Z')
+      end.to raise_error(ArgumentError, /start_time_gte/)
     end
 
     it 'serialises PageToken on the wire' do

@@ -47,12 +47,13 @@ module VoiceML
     def each(**kwargs, &block)
       return enum_for(:each, **kwargs) unless block
 
-      page_num = kwargs.delete(:page) || 0
+      page = list(**kwargs)
       loop do
-        chunk = list(**kwargs, page: page_num)
-        chunk.queues.each(&block)
-        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.queues.empty?
-        page_num += 1
+        page.queues.each(&block)
+        nxt = next_page(page)
+        break if nxt.nil?
+
+        page = nxt
       end
     end
 

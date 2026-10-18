@@ -9,6 +9,7 @@ module VoiceML
   # the model exists to decode the response shape (KX-prefixed sid +
   # account/call sids) for conformance and round-trip tooling.
   class UserDefinedMessage
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid call_sid date_created
     ].freeze
@@ -16,6 +17,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)

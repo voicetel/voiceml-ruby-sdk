@@ -15,7 +15,9 @@ module VoiceML
       'VoiceCallerIdLookup'    => :voice_caller_id_lookup,
       'StatusCallback'         => :status_callback,
       'StatusCallbackMethod'   => :status_callback_method,
-      'StatusCallbackEvent'    => :status_callback_event
+      'StatusCallbackEvent'    => :status_callback_event,
+      'MessageStatusCallback'  => :message_status_callback,
+      'SmsStatusCallback'      => :sms_status_callback
     }.freeze
 
     LIST_FIELDS = {

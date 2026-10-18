@@ -10,6 +10,7 @@ module VoiceML
   # account must have `pay_enabled = true` AND a `stripe_secret_key` set, or
   # the call fails 403.
   class CallPayment
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid call_sid api_version
       date_created date_updated uri
@@ -18,6 +19,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)

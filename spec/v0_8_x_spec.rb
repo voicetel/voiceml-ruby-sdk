@@ -85,7 +85,7 @@ RSpec.describe 'VoiceML v0.8.x — SIP Trunking + Routes V2' do
 
     it 'list, fetch, update, delete' do
       stub_request(:get, "#{base_url}#{sip_path('Domains')}")
-        .to_return(status: 200, body: { domains: [JSON.parse(domain_body)], page: 0, page_size: 50, total: 1 }.to_json,
+        .to_return(status: 200, body: { domains: [JSON.parse(domain_body)], page: 0, page_size: 50 }.to_json,
                    headers: { 'Content-Type' => 'application/json' })
       stub_request(:get, "#{base_url}#{sip_path('Domains', domain_sid)}")
         .to_return(status: 200, body: domain_body, headers: { 'Content-Type' => 'application/json' })

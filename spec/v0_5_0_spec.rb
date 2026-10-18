@@ -39,9 +39,10 @@ RSpec.describe 'voiceml-ruby v0.5.0' do
       end.to raise_error(ArgumentError, /api_key.*auth_token/)
     end
 
-    it 'still rejects empty credentials via ConfigurationError' do
+    it 'allows credential-less construction for diagnostics, but rejects empty-string keys' do
+      expect { VoiceML::Client.new(account_sid: ACCOUNT_SID) }.not_to raise_error
       expect do
-        VoiceML::Client.new(account_sid: ACCOUNT_SID)
+        VoiceML::Client.new(account_sid: ACCOUNT_SID, api_key: '')
       end.to raise_error(VoiceML::ConfigurationError, /api_key/)
     end
   end

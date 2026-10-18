@@ -14,26 +14,32 @@ module VoiceML
   # --- Price leaves ---------------------------------------------------------
 
   class PricingInboundCallPrice
+    include RawAttributes
     ATTRIBUTES = %w[base_price current_price number_type].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class PricingOutboundCallPrice
+    include RawAttributes
     ATTRIBUTES = %w[base_price current_price].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class PricingOutboundCallPriceWithOrigin
+    include RawAttributes
     attr_reader :origination_prefixes, :base_price, :current_price
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @origination_prefixes = attrs['origination_prefixes'] || attrs[:origination_prefixes] || []
       @base_price    = attrs['base_price'] || attrs[:base_price]
       @current_price = attrs['current_price'] || attrs[:current_price]
@@ -42,8 +48,10 @@ module VoiceML
   end
 
   class PricingOutboundPrefixPrice
+    include RawAttributes
     attr_reader :prefixes, :base_price, :current_price, :friendly_name
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @prefixes      = attrs['prefixes'] || attrs[:prefixes] || []
       @base_price    = attrs['base_price'] || attrs[:base_price]
       @current_price = attrs['current_price'] || attrs[:current_price]
@@ -53,8 +61,10 @@ module VoiceML
   end
 
   class PricingOutboundPrefixPriceWithOrigin
+    include RawAttributes
     attr_reader :origination_prefixes, :destination_prefixes, :base_price, :current_price, :friendly_name
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @origination_prefixes = attrs['origination_prefixes'] || attrs[:origination_prefixes] || []
       @destination_prefixes = attrs['destination_prefixes'] || attrs[:destination_prefixes] || []
       @base_price    = attrs['base_price'] || attrs[:base_price]
@@ -65,8 +75,10 @@ module VoiceML
   end
 
   class PricingOutboundSMSPrice
+    include RawAttributes
     attr_reader :carrier, :mcc, :mnc, :prices
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @carrier = attrs['carrier'] || attrs[:carrier]
       @mcc     = attrs['mcc'] || attrs[:mcc]
       @mnc     = attrs['mnc'] || attrs[:mnc]
@@ -76,10 +88,12 @@ module VoiceML
   end
 
   class PricingPhoneNumberPrice
+    include RawAttributes
     ATTRIBUTES = %w[number_type base_price current_price].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
@@ -87,18 +101,22 @@ module VoiceML
   # --- Countries list envelope ----------------------------------------------
 
   class PricingCountryRef
+    include RawAttributes
     ATTRIBUTES = %w[country iso_country url].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class PricingCountriesList
+    include RawAttributes
     include V1Pageable
     attr_reader :countries
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_meta_fields(hash)
       @countries = (hash['countries'] || []).map { |h| PricingCountryRef.from_hash(h) }
     end
@@ -107,8 +125,10 @@ module VoiceML
   # --- Pricing v1 country / number bodies -----------------------------------
 
   class PricingVoiceCountry
+    include RawAttributes
     attr_reader :country, :iso_country, :outbound_prefix_prices, :inbound_call_prices, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @country     = attrs['country'] || attrs[:country]
       @iso_country = attrs['iso_country'] || attrs[:iso_country]
       @outbound_prefix_prices =
@@ -122,8 +142,10 @@ module VoiceML
   end
 
   class PricingVoiceNumber
+    include RawAttributes
     attr_reader :number, :country, :iso_country, :outbound_call_price, :inbound_call_price, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @number      = attrs['number'] || attrs[:number]
       @country     = attrs['country'] || attrs[:country]
       @iso_country = attrs['iso_country'] || attrs[:iso_country]
@@ -136,8 +158,10 @@ module VoiceML
   end
 
   class PricingMessagingCountry
+    include RawAttributes
     attr_reader :country, :iso_country, :outbound_sms_prices, :inbound_sms_prices, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @country     = attrs['country'] || attrs[:country]
       @iso_country = attrs['iso_country'] || attrs[:iso_country]
       @outbound_sms_prices =
@@ -151,8 +175,10 @@ module VoiceML
   end
 
   class PricingPhoneNumberCountry
+    include RawAttributes
     attr_reader :country, :iso_country, :phone_number_prices, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @country     = attrs['country'] || attrs[:country]
       @iso_country = attrs['iso_country'] || attrs[:iso_country]
       @phone_number_prices =
@@ -166,8 +192,10 @@ module VoiceML
   # --- Pricing v2 country / number bodies -----------------------------------
 
   class PricingVoiceCountryV2
+    include RawAttributes
     attr_reader :country, :iso_country, :outbound_prefix_prices, :inbound_call_prices, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @country     = attrs['country'] || attrs[:country]
       @iso_country = attrs['iso_country'] || attrs[:iso_country]
       @outbound_prefix_prices =
@@ -181,9 +209,11 @@ module VoiceML
   end
 
   class PricingVoiceNumberV2
+    include RawAttributes
     attr_reader :destination_number, :origination_number, :country, :iso_country,
                 :outbound_call_prices, :inbound_call_price, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @destination_number = attrs['destination_number'] || attrs[:destination_number]
       @origination_number = attrs['origination_number'] || attrs[:origination_number]
       @country     = attrs['country'] || attrs[:country]
@@ -198,8 +228,10 @@ module VoiceML
   end
 
   class PricingTrunkingCountry
+    include RawAttributes
     attr_reader :country, :iso_country, :terminating_prefix_prices, :originating_call_prices, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @country     = attrs['country'] || attrs[:country]
       @iso_country = attrs['iso_country'] || attrs[:iso_country]
       @terminating_prefix_prices =
@@ -213,9 +245,11 @@ module VoiceML
   end
 
   class PricingTrunkingNumber
+    include RawAttributes
     attr_reader :destination_number, :origination_number, :country, :iso_country,
                 :terminating_prefix_prices, :originating_call_price, :price_unit, :url
     def initialize(attrs = {})
+      @raw_attributes = attrs
       @destination_number = attrs['destination_number'] || attrs[:destination_number]
       @origination_number = attrs['origination_number'] || attrs[:origination_number]
       @country     = attrs['country'] || attrs[:country]

@@ -6,6 +6,7 @@ module VoiceML
   # A Twilio-compatible Call resource. Returned by `client.calls.create`, `client.calls.get`,
   # `client.calls.update`, and listed in `CallList#calls`.
   class Call
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid api_version to to_formatted from from_formatted
       parent_call_sid caller_name forwarded_from status direction
@@ -17,6 +18,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)
@@ -32,11 +34,13 @@ module VoiceML
 
   # Paginated `GET /Calls` response.
   class CallList
+    include RawAttributes
     include Pageable
 
     attr_reader :calls
 
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @calls = (hash['calls'] || []).map { |c| Call.from_hash(c) }
     end

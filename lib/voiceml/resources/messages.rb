@@ -2,21 +2,25 @@
 
 require_relative 'base'
 require_relative '../models/messages'
+require_relative '../models/media'
 
 module VoiceML
-  # Operations on `/Messages` — VoiceTel's Twilio-compatible SMS surface,
-  # backed by the SDK 2.2 gateway. Outbound-only today (no MMS, no inbound
-  # webhook delivery).
+  # Operations on `/Messages` — VoiceTel's Twilio-compatible SMS/MMS surface,
+  # backed by the SDK 2.2 gateway.
   #
   # All methods accept idiomatic snake_case keyword arguments — they're
-  # translated to the PascalCase wire names internally.
+  # translated to the PascalCase wire names internally. Unknown kwargs raise
+  # `ArgumentError`.
   class MessagesResource < BaseResource
     CREATE_FIELDS = {
       'To'                   => :to,
       'Body'                 => :body,
+      'MediaUrl'             => :media_url,
       'From'                 => :from,
       'MessagingServiceSid'  => :messaging_service_sid,
-      'StatusCallback'       => :status_callback
+      'ValidityPeriod'       => :validity_period,
+      'StatusCallback'       => :status_callback,
+      'StatusCallbackMethod' => :status_callback_method
     }.freeze
 
     LIST_FIELDS = {
@@ -35,12 +39,31 @@ module VoiceML
       'Status' => :status
     }.freeze
 
-    # Dispatch an outbound SMS. `to:` and `body:` are required; `from:` falls
-    # back to the tenant's configured default sender when omitted.
+    FEEDBACK_FIELDS = {
+      'Outcome' => :outcome
+    }.freeze
+
+    LIST_MEDIA_FIELDS = {
+      'DateCreated'  => :date_created,
+      'DateCreated<' => :date_created_lt,
+      'DateCreated>' => :date_created_gt,
+      'Page'         => :page,
+      'PageSize'     => :page_size,
+      'PageToken'    => :page_token
+    }.freeze
+
+    # Dispatch an outbound SMS or MMS. `to:` is required, plus at least one of
+    # `body:` (SMS text) or `media_url:` (MMS media; pass a string or an array —
+    # repeated keys are sent on the wire). `from:` falls back to the tenant's
+    # configured default sender when omitted.
     #
     # @return [VoiceML::Message]
     def create(**kwargs)
-      data = @transport.request(:post, path('Messages'), form: form_params(CREATE_FIELDS, kwargs))
+      form = form_params(CREATE_FIELDS, kwargs)
+      raise ArgumentError, 'to: is required' if form['To'].nil?
+      raise ArgumentError, 'either body: or media_url: is required' if form['Body'].nil? && form['MediaUrl'].nil?
+
+      data = @transport.request(:post, path('Messages'), form: form)
       Message.from_hash(data)
     end
 
@@ -61,21 +84,22 @@ module VoiceML
       )
     end
 
-    # Walk every page of /Messages and yield each Message. Returns an Enumerator
-    # when called without a block.
+    # Walk every page of /Messages and yield each Message, following the
+    # envelope's `next_page_uri` verbatim (the server requires its `PageToken`
+    # on page 2+). Returns an Enumerator when called without a block.
     #
     # @yield [VoiceML::Message]
     # @return [Enumerator<VoiceML::Message>] when no block given
     def each(**kwargs, &block)
       return enum_for(:each, **kwargs) unless block
 
-      page_num = kwargs.delete(:page) || 0
+      page = list(**kwargs)
       loop do
-        chunk = list(**kwargs, page: page_num)
-        chunk.messages.each(&block)
-        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.messages.empty?
+        page.messages.each(&block)
+        nxt = next_page(page)
+        break if nxt.nil?
 
-        page_num += 1
+        page = nxt
       end
     end
 
@@ -90,11 +114,51 @@ module VoiceML
       Message.from_hash(data)
     end
 
+    # Submit delivery feedback for a Message
+    # (`POST /Messages/{Sid}/Feedback.json`). `outcome:` is `"confirmed"` or
+    # `"unconfirmed"`; any other value echoes back as `unconfirmed` and the
+    # feedback is not persisted.
+    #
+    # @return [VoiceML::MessageFeedback]
+    def create_feedback(sid, outcome:)
+      MessageFeedback.from_hash(
+        @transport.request(:post, path('Messages', sid, 'Feedback'),
+                           form: form_params(FEEDBACK_FIELDS, { outcome: outcome }))
+      )
+    end
+
     # Remove a Message resource from the account's store.
     #
     # @return [nil]
     def delete(sid)
       @transport.request(:delete, path('Messages', sid))
+      nil
+    end
+
+    # --- Media (`/Messages/{MessageSid}/Media`) ---
+
+    # List the media items of a message.
+    #
+    # @return [VoiceML::MediaList]
+    def list_media(message_sid, **kwargs)
+      MediaList.from_hash(
+        @transport.request(:get, path('Messages', message_sid, 'Media'),
+                           params: form_params(LIST_MEDIA_FIELDS, kwargs))
+      )
+    end
+
+    # Fetch one media item's metadata.
+    #
+    # @return [VoiceML::Media]
+    def get_media(message_sid, sid)
+      Media.from_hash(@transport.request(:get, path('Messages', message_sid, 'Media', sid)))
+    end
+
+    # Delete a media item.
+    #
+    # @return [nil]
+    def delete_media(message_sid, sid)
+      @transport.request(:delete, path('Messages', message_sid, 'Media', sid))
       nil
     end
   end

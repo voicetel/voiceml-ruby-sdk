@@ -93,19 +93,19 @@ RSpec.describe 'VoiceML v0.9.0 Phase 4 — service-scoped Conversations v1' do
   describe 'ServiceConversationMessage' do
     let(:body) do
       { sid: im_sid, account_sid: account_sid, chat_service_sid: is_sid,
-        conversation_sid: ch_sid, index: 0, author: '+15551234567',
+        conversation_sid: ch_sid, index: 0, author: '+14155550103',
         body: 'Hi', attributes: '{}',
         date_created: 'x', date_updated: 'x', url: 'x' }.to_json
     end
 
     it 'create POSTs Author + Body + ContentSid' do
       stub_request(:post, "#{base_url}/v1/Services/#{is_sid}/Conversations/#{ch_sid}/Messages")
-        .with(body: hash_including('Author' => '+15551234567',
+        .with(body: hash_including('Author' => '+14155550103',
                                     'Body' => 'Hi',
                                     'ContentSid' => 'HX' + 'a' * 32))
         .to_return(status: 201, body: body, headers: { 'Content-Type' => 'application/json' })
       m = scope.create_message(ch_sid,
-            author: '+15551234567', body: 'Hi', content_sid: 'HX' + 'a' * 32)
+            author: '+14155550103', body: 'Hi', content_sid: 'HX' + 'a' * 32)
       expect(m.sid).to eq(im_sid)
       expect(m.chat_service_sid).to eq(is_sid)
     end
@@ -175,14 +175,14 @@ RSpec.describe 'VoiceML v0.9.0 Phase 4 — service-scoped Conversations v1' do
         .with(body: hash_including(
           'Identity' => 'alice',
           'RoleSid' => rl_sid,
-          'MessagingBinding.Address' => '+18005550000',
+          'MessagingBinding.Address' => '+14155550101',
           'MessagingBinding.ProxyAddress' => '+18005551111',
           'MessagingBinding.ProjectedAddress' => '+18005552222'
         ))
         .to_return(status: 201, body: body, headers: { 'Content-Type' => 'application/json' })
       p = scope.create_participant(ch_sid,
             identity: 'alice', role_sid: rl_sid,
-            messaging_binding_address: '+18005550000',
+            messaging_binding_address: '+14155550101',
             messaging_binding_proxy_address: '+18005551111',
             messaging_binding_projected_address: '+18005552222')
       expect(p.sid).to eq(mb_sid)
@@ -302,9 +302,9 @@ RSpec.describe 'VoiceML v0.9.0 Phase 4 — service-scoped Conversations v1' do
       payload = { conversations: [JSON.parse(body)],
                   meta: meta(url: "#{base_url}/v1/Services/#{is_sid}/ParticipantConversations") }.to_json
       stub_request(:get, "#{base_url}/v1/Services/#{is_sid}/ParticipantConversations")
-        .with(query: hash_including('Identity' => 'alice', 'Address' => '+18005551234'))
+        .with(query: hash_including('Identity' => 'alice', 'Address' => '+14155550100'))
         .to_return(status: 200, body: payload, headers: { 'Content-Type' => 'application/json' })
-      page = scope.list_participant_conversations(identity: 'alice', address: '+18005551234')
+      page = scope.list_participant_conversations(identity: 'alice', address: '+14155550100')
       expect(page.conversations.first.participant_identity).to eq('alice')
       expect(page.conversations.first.chat_service_sid).to eq(is_sid)
     end

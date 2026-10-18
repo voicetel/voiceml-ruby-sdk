@@ -18,7 +18,7 @@ RSpec.describe 'VoiceML v0.6.6' do
     it 'sends From and To on the wire' do
       conf_sid = 'CF' + ('f' * 32)
       stub_request(:post, "#{base_url}/2010-04-01/Accounts/#{account_sid}/Conferences/#{conf_sid}/Participants.json")
-        .with(body: hash_including('From' => '+18005550000', 'To' => '+18005551234'))
+        .with(body: hash_including('From' => '+14155550101', 'To' => '+14155550100'))
         .to_return(
           status: 201,
           body: {
@@ -32,7 +32,7 @@ RSpec.describe 'VoiceML v0.6.6' do
           headers: { 'Content-Type' => 'application/json' }
         )
 
-      client.conferences.create_participant(conf_sid, from: '+18005550000', to: '+18005551234')
+      client.conferences.create_participant(conf_sid, from: '+14155550101', to: '+14155550100')
     end
   end
 
@@ -48,7 +48,7 @@ RSpec.describe 'VoiceML v0.6.6' do
         ))
         .to_return(
           status: 200,
-          body: { notifications: [], page: 0, page_size: 50, total: 0 }.to_json,
+          body: { notifications: [], page: 0, page_size: 50 }.to_json,
           headers: { 'Content-Type' => 'application/json' }
         )
 

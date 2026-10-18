@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 require_relative '../models/conversations_v1'
 
 module VoiceML
@@ -27,6 +29,8 @@ module VoiceML
   # webhooks, message receipts).
   # ============================================================================
   class ConversationsV1ConversationsResource
+    include V1Pages
+    include FieldMapping
     CONVERSATION_FIELDS = {
       'FriendlyName' => :friendly_name,
       'UniqueName' => :unique_name,
@@ -106,22 +110,22 @@ module VoiceML
 
     def create(**kwargs)
       ConversationsV1Conversation.from_hash(
-        @transport.request(:post, '/v1/Conversations', form: build_form(CONVERSATION_FIELDS, kwargs))
+        @transport.request(:post, '/v1/Conversations', form: form_params(CONVERSATION_FIELDS, kwargs))
       )
     end
 
     def fetch(sid)
-      ConversationsV1Conversation.from_hash(@transport.request(:get, "/v1/Conversations/#{sid}"))
+      ConversationsV1Conversation.from_hash(@transport.request(:get, "/v1/Conversations/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, **kwargs)
       ConversationsV1Conversation.from_hash(
-        @transport.request(:post, "/v1/Conversations/#{sid}", form: build_form(UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Conversations/#{encode_path_segment(sid)}", form: form_params(UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/Conversations/#{sid}")
+      @transport.request(:delete, "/v1/Conversations/#{encode_path_segment(sid)}")
       nil
     end
 
@@ -130,32 +134,32 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ConversationMessageList.new(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Messages", params: params)
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Messages", params: params)
       )
     end
 
     def create_message(conversation_sid, **kwargs)
       ConversationsV1ConversationMessage.from_hash(
-        @transport.request(:post, "/v1/Conversations/#{conversation_sid}/Messages",
-                           form: build_form(MESSAGE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Messages",
+                           form: form_params(MESSAGE_FIELDS, kwargs))
       )
     end
 
     def fetch_message(conversation_sid, message_sid)
       ConversationsV1ConversationMessage.from_hash(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Messages/#{message_sid}")
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}")
       )
     end
 
     def update_message(conversation_sid, message_sid, **kwargs)
       ConversationsV1ConversationMessage.from_hash(
-        @transport.request(:post, "/v1/Conversations/#{conversation_sid}/Messages/#{message_sid}",
-                           form: build_form(MESSAGE_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}",
+                           form: form_params(MESSAGE_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_message(conversation_sid, message_sid)
-      @transport.request(:delete, "/v1/Conversations/#{conversation_sid}/Messages/#{message_sid}")
+      @transport.request(:delete, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}")
       nil
     end
 
@@ -164,14 +168,14 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ConversationMessageReceiptList.new(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Messages/#{message_sid}/Receipts",
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}/Receipts",
                            params: params)
       )
     end
 
     def fetch_message_receipt(conversation_sid, message_sid, sid)
       ConversationsV1ConversationMessageReceipt.from_hash(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Messages/#{message_sid}/Receipts/#{sid}")
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}/Receipts/#{encode_path_segment(sid)}")
       )
     end
 
@@ -180,32 +184,32 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ConversationParticipantList.new(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Participants", params: params)
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Participants", params: params)
       )
     end
 
     def create_participant(conversation_sid, **kwargs)
       ConversationsV1ConversationParticipant.from_hash(
-        @transport.request(:post, "/v1/Conversations/#{conversation_sid}/Participants",
-                           form: build_form(PARTICIPANT_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Participants",
+                           form: form_params(PARTICIPANT_FIELDS, kwargs))
       )
     end
 
     def fetch_participant(conversation_sid, participant_sid)
       ConversationsV1ConversationParticipant.from_hash(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Participants/#{participant_sid}")
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Participants/#{encode_path_segment(participant_sid)}")
       )
     end
 
     def update_participant(conversation_sid, participant_sid, **kwargs)
       ConversationsV1ConversationParticipant.from_hash(
-        @transport.request(:post, "/v1/Conversations/#{conversation_sid}/Participants/#{participant_sid}",
-                           form: build_form(PARTICIPANT_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Participants/#{encode_path_segment(participant_sid)}",
+                           form: form_params(PARTICIPANT_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_participant(conversation_sid, participant_sid)
-      @transport.request(:delete, "/v1/Conversations/#{conversation_sid}/Participants/#{participant_sid}")
+      @transport.request(:delete, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Participants/#{encode_path_segment(participant_sid)}")
       nil
     end
 
@@ -214,54 +218,44 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ConversationScopedWebhookList.new(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Webhooks", params: params)
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Webhooks", params: params)
       )
     end
 
     def create_webhook(conversation_sid, target:, **kwargs)
       kwargs[:target] = target
       ConversationsV1ConversationScopedWebhook.from_hash(
-        @transport.request(:post, "/v1/Conversations/#{conversation_sid}/Webhooks",
-                           form: build_form(WEBHOOK_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Webhooks",
+                           form: form_params(WEBHOOK_FIELDS, kwargs))
       )
     end
 
     def fetch_webhook(conversation_sid, webhook_sid)
       ConversationsV1ConversationScopedWebhook.from_hash(
-        @transport.request(:get, "/v1/Conversations/#{conversation_sid}/Webhooks/#{webhook_sid}")
+        @transport.request(:get, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Webhooks/#{encode_path_segment(webhook_sid)}")
       )
     end
 
     def update_webhook(conversation_sid, webhook_sid, **kwargs)
       ConversationsV1ConversationScopedWebhook.from_hash(
-        @transport.request(:post, "/v1/Conversations/#{conversation_sid}/Webhooks/#{webhook_sid}",
-                           form: build_form(WEBHOOK_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Webhooks/#{encode_path_segment(webhook_sid)}",
+                           form: form_params(WEBHOOK_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_webhook(conversation_sid, webhook_sid)
-      @transport.request(:delete, "/v1/Conversations/#{conversation_sid}/Webhooks/#{webhook_sid}")
+      @transport.request(:delete, "/v1/Conversations/#{encode_path_segment(conversation_sid)}/Webhooks/#{encode_path_segment(webhook_sid)}")
       nil
     end
 
-    private
-
-    def build_form(map, kwargs)
-      out = {}
-      map.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        out[wire] = value
-      end
-      out
-    end
   end
 
   # ============================================================================
   # /v1/Roles
   # ============================================================================
   class ConversationsV1RolesResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
@@ -278,16 +272,16 @@ module VoiceML
     end
 
     def fetch(sid)
-      ConversationsV1Role.from_hash(@transport.request(:get, "/v1/Roles/#{sid}"))
+      ConversationsV1Role.from_hash(@transport.request(:get, "/v1/Roles/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, permission:)
       form = { 'Permission' => Array(permission) }
-      ConversationsV1Role.from_hash(@transport.request(:post, "/v1/Roles/#{sid}", form: form))
+      ConversationsV1Role.from_hash(@transport.request(:post, "/v1/Roles/#{encode_path_segment(sid)}", form: form))
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/Roles/#{sid}")
+      @transport.request(:delete, "/v1/Roles/#{encode_path_segment(sid)}")
       nil
     end
   end
@@ -296,6 +290,8 @@ module VoiceML
   # /v1/Users + nested /v1/Users/{Sid}/Conversations (UserConversation)
   # ============================================================================
   class ConversationsV1UsersResource
+    include V1Pages
+    include FieldMapping
     USER_FIELDS = {
       'Identity' => :identity,
       'FriendlyName' => :friendly_name,
@@ -327,21 +323,21 @@ module VoiceML
 
     def create(identity:, friendly_name: nil, attributes: nil, role_sid: nil)
       kwargs = { identity: identity, friendly_name: friendly_name, attributes: attributes, role_sid: role_sid }
-      ConversationsV1User.from_hash(@transport.request(:post, '/v1/Users', form: build_form(USER_FIELDS, kwargs)))
+      ConversationsV1User.from_hash(@transport.request(:post, '/v1/Users', form: form_params(USER_FIELDS, kwargs)))
     end
 
     def fetch(sid)
-      ConversationsV1User.from_hash(@transport.request(:get, "/v1/Users/#{sid}"))
+      ConversationsV1User.from_hash(@transport.request(:get, "/v1/Users/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, **kwargs)
       ConversationsV1User.from_hash(
-        @transport.request(:post, "/v1/Users/#{sid}", form: build_form(USER_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Users/#{encode_path_segment(sid)}", form: form_params(USER_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/Users/#{sid}")
+      @transport.request(:delete, "/v1/Users/#{encode_path_segment(sid)}")
       nil
     end
 
@@ -350,46 +346,36 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1UserConversationList.new(
-        @transport.request(:get, "/v1/Users/#{user_sid}/Conversations", params: params)
+        @transport.request(:get, "/v1/Users/#{encode_path_segment(user_sid)}/Conversations", params: params)
       )
     end
 
     def fetch_user_conversation(user_sid, conversation_sid)
       ConversationsV1UserConversation.from_hash(
-        @transport.request(:get, "/v1/Users/#{user_sid}/Conversations/#{conversation_sid}")
+        @transport.request(:get, "/v1/Users/#{encode_path_segment(user_sid)}/Conversations/#{encode_path_segment(conversation_sid)}")
       )
     end
 
     def update_user_conversation(user_sid, conversation_sid, **kwargs)
       ConversationsV1UserConversation.from_hash(
-        @transport.request(:post, "/v1/Users/#{user_sid}/Conversations/#{conversation_sid}",
-                           form: build_form(USER_CONVERSATION_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Users/#{encode_path_segment(user_sid)}/Conversations/#{encode_path_segment(conversation_sid)}",
+                           form: form_params(USER_CONVERSATION_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_user_conversation(user_sid, conversation_sid)
-      @transport.request(:delete, "/v1/Users/#{user_sid}/Conversations/#{conversation_sid}")
+      @transport.request(:delete, "/v1/Users/#{encode_path_segment(user_sid)}/Conversations/#{encode_path_segment(conversation_sid)}")
       nil
     end
 
-    private
-
-    def build_form(map, kwargs)
-      out = {}
-      map.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        out[wire] = value
-      end
-      out
-    end
   end
 
   # ============================================================================
   # /v1/Credentials (push credentials — distinct from /SIP/Credentials)
   # ============================================================================
   class ConversationsV1CredentialsResource
+    include V1Pages
+    include FieldMapping
     CREDENTIAL_FIELDS = {
       'Type' => :type,
       'FriendlyName' => :friendly_name,
@@ -413,43 +399,33 @@ module VoiceML
     def create(type:, **kwargs)
       kwargs[:type] = type
       ConversationsV1Credential.from_hash(
-        @transport.request(:post, '/v1/Credentials', form: build_form(kwargs))
+        @transport.request(:post, '/v1/Credentials', form: form_params(CREDENTIAL_FIELDS, kwargs))
       )
     end
 
     def fetch(sid)
-      ConversationsV1Credential.from_hash(@transport.request(:get, "/v1/Credentials/#{sid}"))
+      ConversationsV1Credential.from_hash(@transport.request(:get, "/v1/Credentials/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, **kwargs)
       ConversationsV1Credential.from_hash(
-        @transport.request(:post, "/v1/Credentials/#{sid}", form: build_form(kwargs))
+        @transport.request(:post, "/v1/Credentials/#{encode_path_segment(sid)}", form: form_params(CREDENTIAL_FIELDS, kwargs))
       )
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/Credentials/#{sid}")
+      @transport.request(:delete, "/v1/Credentials/#{encode_path_segment(sid)}")
       nil
     end
 
-    private
-
-    def build_form(kwargs)
-      out = {}
-      CREDENTIAL_FIELDS.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        out[wire] = value
-      end
-      out
-    end
   end
 
   # ============================================================================
   # /v1/Configuration (singleton) + nested /Webhooks (singleton) + /Addresses (CRUD)
   # ============================================================================
   class ConversationsV1ConfigurationResource
+    include V1Pages
+    include FieldMapping
     CONFIG_FIELDS = {
       'DefaultChatServiceSid' => :default_chat_service_sid,
       'DefaultMessagingServiceSid' => :default_messaging_service_sid,
@@ -493,7 +469,7 @@ module VoiceML
 
     def update(**kwargs)
       ConversationsV1Configuration.from_hash(
-        @transport.request(:post, '/v1/Configuration', form: build_form(CONFIG_FIELDS, kwargs))
+        @transport.request(:post, '/v1/Configuration', form: form_params(CONFIG_FIELDS, kwargs))
       )
     end
 
@@ -504,7 +480,7 @@ module VoiceML
 
     def update_webhooks(**kwargs)
       ConversationsV1ConfigurationWebhook.from_hash(
-        @transport.request(:post, '/v1/Configuration/Webhooks', form: build_form(WEBHOOK_FIELDS, kwargs))
+        @transport.request(:post, '/v1/Configuration/Webhooks', form: form_params(WEBHOOK_FIELDS, kwargs))
       )
     end
 
@@ -521,43 +497,33 @@ module VoiceML
       kwargs[:type] = type
       kwargs[:address] = address
       ConversationsV1ConfigAddress.from_hash(
-        @transport.request(:post, '/v1/Configuration/Addresses', form: build_form(ADDRESS_FIELDS, kwargs))
+        @transport.request(:post, '/v1/Configuration/Addresses', form: form_params(ADDRESS_FIELDS, kwargs))
       )
     end
 
     def fetch_address(sid)
-      ConversationsV1ConfigAddress.from_hash(@transport.request(:get, "/v1/Configuration/Addresses/#{sid}"))
+      ConversationsV1ConfigAddress.from_hash(@transport.request(:get, "/v1/Configuration/Addresses/#{encode_path_segment(sid)}"))
     end
 
     def update_address(sid, **kwargs)
       ConversationsV1ConfigAddress.from_hash(
-        @transport.request(:post, "/v1/Configuration/Addresses/#{sid}", form: build_form(ADDRESS_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Configuration/Addresses/#{encode_path_segment(sid)}", form: form_params(ADDRESS_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_address(sid)
-      @transport.request(:delete, "/v1/Configuration/Addresses/#{sid}")
+      @transport.request(:delete, "/v1/Configuration/Addresses/#{encode_path_segment(sid)}")
       nil
     end
 
-    private
-
-    def build_form(map, kwargs)
-      out = {}
-      map.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        out[wire] = value
-      end
-      out
-    end
   end
 
   # ============================================================================
   # /v1/ParticipantConversations (read-only list)
   # ============================================================================
   class ConversationsV1ParticipantConversationsResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
@@ -577,6 +543,8 @@ module VoiceML
   # /v1/ConversationWithParticipants (single-call conv + participants)
   # ============================================================================
   class ConversationsV1ConversationWithParticipantsResource
+    include V1Pages
+    include FieldMapping
     FIELDS = {
       'FriendlyName' => :friendly_name,
       'UniqueName' => :unique_name,
@@ -594,13 +562,7 @@ module VoiceML
 
     def create(participant: nil, **kwargs)
       kwargs[:participant] = participant unless participant.nil?
-      form = {}
-      FIELDS.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        form[wire] = value
-      end
+      form = form_params(FIELDS, kwargs)
       ConversationsV1ConversationWithParticipants.from_hash(
         @transport.request(:post, '/v1/ConversationWithParticipants', form: form)
       )
@@ -611,6 +573,8 @@ module VoiceML
   # /v1/Services + nested /Conversations
   # ============================================================================
   class ConversationsV1ServicesResource
+    include V1Pages
+    include FieldMapping
     SERVICE_CONVERSATION_FIELDS = {
       'FriendlyName' => :friendly_name,
       'UniqueName' => :unique_name,
@@ -640,18 +604,39 @@ module VoiceML
       ConversationsV1ServiceList.new(@transport.request(:get, '/v1/Services', params: params))
     end
 
-    def create(friendly_name:)
+    # Shared wire body with Messaging Service (`POST /v1/Services` dispatches
+    # by product host); the Conversations surface sets FriendlyName in practice.
+    SERVICE_FIELDS = {
+      'FriendlyName' => :friendly_name,
+      'InboundRequestUrl' => :inbound_request_url,
+      'InboundMethod' => :inbound_method,
+      'FallbackUrl' => :fallback_url,
+      'FallbackMethod' => :fallback_method,
+      'StatusCallback' => :status_callback,
+      'StickySender' => :sticky_sender,
+      'MmsConverter' => :mms_converter,
+      'SmartEncoding' => :smart_encoding,
+      'ScanMessageContent' => :scan_message_content,
+      'FallbackToLongCode' => :fallback_to_long_code,
+      'AreaCodeGeomatch' => :area_code_geomatch,
+      'SynchronousValidation' => :synchronous_validation,
+      'ValidityPeriod' => :validity_period,
+      'Usecase' => :usecase,
+      'UseInboundWebhookOnNumber' => :use_inbound_webhook_on_number
+    }.freeze
+
+    def create(**kwargs)
       ConversationsV1Service.from_hash(
-        @transport.request(:post, '/v1/Services', form: { 'FriendlyName' => friendly_name })
+        @transport.request(:post, '/v1/Services', form: form_params(SERVICE_FIELDS, kwargs))
       )
     end
 
     def fetch(chat_service_sid)
-      ConversationsV1Service.from_hash(@transport.request(:get, "/v1/Services/#{chat_service_sid}"))
+      ConversationsV1Service.from_hash(@transport.request(:get, "/v1/Services/#{encode_path_segment(chat_service_sid)}"))
     end
 
     def delete(chat_service_sid)
-      @transport.request(:delete, "/v1/Services/#{chat_service_sid}")
+      @transport.request(:delete, "/v1/Services/#{encode_path_segment(chat_service_sid)}")
       nil
     end
 
@@ -660,32 +645,32 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ServiceConversationList.new(
-        @transport.request(:get, "/v1/Services/#{chat_service_sid}/Conversations", params: params)
+        @transport.request(:get, "/v1/Services/#{encode_path_segment(chat_service_sid)}/Conversations", params: params)
       )
     end
 
     def create_conversation(chat_service_sid, **kwargs)
       ConversationsV1ServiceConversation.from_hash(
-        @transport.request(:post, "/v1/Services/#{chat_service_sid}/Conversations",
-                           form: build_form(SERVICE_CONVERSATION_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Services/#{encode_path_segment(chat_service_sid)}/Conversations",
+                           form: form_params(SERVICE_CONVERSATION_FIELDS, kwargs))
       )
     end
 
     def fetch_conversation(chat_service_sid, conversation_sid)
       ConversationsV1ServiceConversation.from_hash(
-        @transport.request(:get, "/v1/Services/#{chat_service_sid}/Conversations/#{conversation_sid}")
+        @transport.request(:get, "/v1/Services/#{encode_path_segment(chat_service_sid)}/Conversations/#{encode_path_segment(conversation_sid)}")
       )
     end
 
     def update_conversation(chat_service_sid, conversation_sid, **kwargs)
       ConversationsV1ServiceConversation.from_hash(
-        @transport.request(:post, "/v1/Services/#{chat_service_sid}/Conversations/#{conversation_sid}",
-                           form: build_form(SERVICE_CONVERSATION_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "/v1/Services/#{encode_path_segment(chat_service_sid)}/Conversations/#{encode_path_segment(conversation_sid)}",
+                           form: form_params(SERVICE_CONVERSATION_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_conversation(chat_service_sid, conversation_sid)
-      @transport.request(:delete, "/v1/Services/#{chat_service_sid}/Conversations/#{conversation_sid}")
+      @transport.request(:delete, "/v1/Services/#{encode_path_segment(chat_service_sid)}/Conversations/#{encode_path_segment(conversation_sid)}")
       nil
     end
 
@@ -696,18 +681,6 @@ module VoiceML
       ConversationsV1ServiceScopeResource.new(@transport, chat_service_sid)
     end
 
-    private
-
-    def build_form(map, kwargs)
-      out = {}
-      map.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        out[wire] = value
-      end
-      out
-    end
   end
 
   # ============================================================================
@@ -716,6 +689,8 @@ module VoiceML
   # Flat method style matches the rest of conversations_v1.
   # ============================================================================
   class ConversationsV1ServiceScopeResource
+    include V1Pages
+    include FieldMapping
     CONVERSATION_FIELDS = {
       'FriendlyName' => :friendly_name,
       'UniqueName' => :unique_name,
@@ -847,25 +822,25 @@ module VoiceML
 
     def create_conversation(**kwargs)
       ConversationsV1ServiceConversation.from_hash(
-        @transport.request(:post, conv_root, form: build_form(CONVERSATION_FIELDS, kwargs))
+        @transport.request(:post, conv_root, form: form_params(CONVERSATION_FIELDS, kwargs))
       )
     end
 
     def fetch_conversation(conversation_sid)
       ConversationsV1ServiceConversation.from_hash(
-        @transport.request(:get, "#{conv_root}/#{conversation_sid}")
+        @transport.request(:get, "#{conv_root}/#{encode_path_segment(conversation_sid)}")
       )
     end
 
     def update_conversation(conversation_sid, **kwargs)
       ConversationsV1ServiceConversation.from_hash(
-        @transport.request(:post, "#{conv_root}/#{conversation_sid}",
-                           form: build_form(CONVERSATION_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "#{conv_root}/#{encode_path_segment(conversation_sid)}",
+                           form: form_params(CONVERSATION_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_conversation(conversation_sid)
-      @transport.request(:delete, "#{conv_root}/#{conversation_sid}")
+      @transport.request(:delete, "#{conv_root}/#{encode_path_segment(conversation_sid)}")
       nil
     end
 
@@ -874,32 +849,32 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ServiceConversationMessageList.new(
-        @transport.request(:get, "#{conv_root}/#{conversation_sid}/Messages", params: params)
+        @transport.request(:get, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Messages", params: params)
       )
     end
 
     def create_message(conversation_sid, **kwargs)
       ConversationsV1ServiceConversationMessage.from_hash(
-        @transport.request(:post, "#{conv_root}/#{conversation_sid}/Messages",
-                           form: build_form(MESSAGE_FIELDS, kwargs))
+        @transport.request(:post, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Messages",
+                           form: form_params(MESSAGE_FIELDS, kwargs))
       )
     end
 
     def fetch_message(conversation_sid, message_sid)
       ConversationsV1ServiceConversationMessage.from_hash(
-        @transport.request(:get, "#{conv_root}/#{conversation_sid}/Messages/#{message_sid}")
+        @transport.request(:get, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}")
       )
     end
 
     def update_message(conversation_sid, message_sid, **kwargs)
       ConversationsV1ServiceConversationMessage.from_hash(
-        @transport.request(:post, "#{conv_root}/#{conversation_sid}/Messages/#{message_sid}",
-                           form: build_form(MESSAGE_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}",
+                           form: form_params(MESSAGE_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_message(conversation_sid, message_sid)
-      @transport.request(:delete, "#{conv_root}/#{conversation_sid}/Messages/#{message_sid}")
+      @transport.request(:delete, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}")
       nil
     end
 
@@ -909,7 +884,7 @@ module VoiceML
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ServiceConversationMessageReceiptList.new(
         @transport.request(:get,
-                           "#{conv_root}/#{conversation_sid}/Messages/#{message_sid}/Receipts",
+                           "#{conv_root}/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}/Receipts",
                            params: params)
       )
     end
@@ -917,7 +892,7 @@ module VoiceML
     def fetch_message_receipt(conversation_sid, message_sid, sid)
       ConversationsV1ServiceConversationMessageReceipt.from_hash(
         @transport.request(:get,
-                           "#{conv_root}/#{conversation_sid}/Messages/#{message_sid}/Receipts/#{sid}")
+                           "#{conv_root}/#{encode_path_segment(conversation_sid)}/Messages/#{encode_path_segment(message_sid)}/Receipts/#{encode_path_segment(sid)}")
       )
     end
 
@@ -926,32 +901,32 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ServiceConversationParticipantList.new(
-        @transport.request(:get, "#{conv_root}/#{conversation_sid}/Participants", params: params)
+        @transport.request(:get, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Participants", params: params)
       )
     end
 
     def create_participant(conversation_sid, **kwargs)
       ConversationsV1ServiceConversationParticipant.from_hash(
-        @transport.request(:post, "#{conv_root}/#{conversation_sid}/Participants",
-                           form: build_form(PARTICIPANT_FIELDS, kwargs))
+        @transport.request(:post, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Participants",
+                           form: form_params(PARTICIPANT_FIELDS, kwargs))
       )
     end
 
     def fetch_participant(conversation_sid, participant_sid)
       ConversationsV1ServiceConversationParticipant.from_hash(
-        @transport.request(:get, "#{conv_root}/#{conversation_sid}/Participants/#{participant_sid}")
+        @transport.request(:get, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Participants/#{encode_path_segment(participant_sid)}")
       )
     end
 
     def update_participant(conversation_sid, participant_sid, **kwargs)
       ConversationsV1ServiceConversationParticipant.from_hash(
-        @transport.request(:post, "#{conv_root}/#{conversation_sid}/Participants/#{participant_sid}",
-                           form: build_form(PARTICIPANT_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Participants/#{encode_path_segment(participant_sid)}",
+                           form: form_params(PARTICIPANT_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_participant(conversation_sid, participant_sid)
-      @transport.request(:delete, "#{conv_root}/#{conversation_sid}/Participants/#{participant_sid}")
+      @transport.request(:delete, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Participants/#{encode_path_segment(participant_sid)}")
       nil
     end
 
@@ -960,33 +935,33 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ServiceConversationScopedWebhookList.new(
-        @transport.request(:get, "#{conv_root}/#{conversation_sid}/Webhooks", params: params)
+        @transport.request(:get, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Webhooks", params: params)
       )
     end
 
     def create_webhook(conversation_sid, target:, **kwargs)
       kwargs[:target] = target
       ConversationsV1ServiceConversationScopedWebhook.from_hash(
-        @transport.request(:post, "#{conv_root}/#{conversation_sid}/Webhooks",
-                           form: build_form(WEBHOOK_FIELDS, kwargs))
+        @transport.request(:post, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Webhooks",
+                           form: form_params(WEBHOOK_FIELDS, kwargs))
       )
     end
 
     def fetch_webhook(conversation_sid, webhook_sid)
       ConversationsV1ServiceConversationScopedWebhook.from_hash(
-        @transport.request(:get, "#{conv_root}/#{conversation_sid}/Webhooks/#{webhook_sid}")
+        @transport.request(:get, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Webhooks/#{encode_path_segment(webhook_sid)}")
       )
     end
 
     def update_webhook(conversation_sid, webhook_sid, **kwargs)
       ConversationsV1ServiceConversationScopedWebhook.from_hash(
-        @transport.request(:post, "#{conv_root}/#{conversation_sid}/Webhooks/#{webhook_sid}",
-                           form: build_form(WEBHOOK_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Webhooks/#{encode_path_segment(webhook_sid)}",
+                           form: form_params(WEBHOOK_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_webhook(conversation_sid, webhook_sid)
-      @transport.request(:delete, "#{conv_root}/#{conversation_sid}/Webhooks/#{webhook_sid}")
+      @transport.request(:delete, "#{conv_root}/#{encode_path_segment(conversation_sid)}/Webhooks/#{encode_path_segment(webhook_sid)}")
       nil
     end
 
@@ -994,7 +969,7 @@ module VoiceML
     def create_conversation_with_participants(**kwargs)
       ConversationsV1ServiceConversationWithParticipants.from_hash(
         @transport.request(:post, "#{svc_root}/ConversationWithParticipants",
-                           form: build_form(CONV_WITH_PARTICIPANTS_FIELDS, kwargs))
+                           form: form_params(CONV_WITH_PARTICIPANTS_FIELDS, kwargs))
       )
     end
 
@@ -1014,7 +989,7 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       ConversationsV1ServiceUserConversationList.new(
-        @transport.request(:get, "#{svc_root}/Users/#{user_sid}/Conversations", params: params)
+        @transport.request(:get, "#{svc_root}/Users/#{encode_path_segment(user_sid)}/Conversations", params: params)
       )
     end
 
@@ -1036,19 +1011,19 @@ module VoiceML
 
     def fetch_role(role_sid)
       ConversationsV1ServiceRole.from_hash(
-        @transport.request(:get, "#{svc_root}/Roles/#{role_sid}")
+        @transport.request(:get, "#{svc_root}/Roles/#{encode_path_segment(role_sid)}")
       )
     end
 
     def update_role(role_sid, permission:)
       form = { 'Permission' => Array(permission) }
       ConversationsV1ServiceRole.from_hash(
-        @transport.request(:post, "#{svc_root}/Roles/#{role_sid}", form: form)
+        @transport.request(:post, "#{svc_root}/Roles/#{encode_path_segment(role_sid)}", form: form)
       )
     end
 
     def delete_role(role_sid)
-      @transport.request(:delete, "#{svc_root}/Roles/#{role_sid}")
+      @transport.request(:delete, "#{svc_root}/Roles/#{encode_path_segment(role_sid)}")
       nil
     end
 
@@ -1065,25 +1040,25 @@ module VoiceML
       kwargs = { identity: identity, friendly_name: friendly_name,
                  attributes: attributes, role_sid: role_sid }
       ConversationsV1ServiceUser.from_hash(
-        @transport.request(:post, "#{svc_root}/Users", form: build_form(USER_FIELDS, kwargs))
+        @transport.request(:post, "#{svc_root}/Users", form: form_params(USER_FIELDS, kwargs))
       )
     end
 
     def fetch_user(user_sid)
       ConversationsV1ServiceUser.from_hash(
-        @transport.request(:get, "#{svc_root}/Users/#{user_sid}")
+        @transport.request(:get, "#{svc_root}/Users/#{encode_path_segment(user_sid)}")
       )
     end
 
     def update_user(user_sid, **kwargs)
       ConversationsV1ServiceUser.from_hash(
-        @transport.request(:post, "#{svc_root}/Users/#{user_sid}",
-                           form: build_form(USER_UPDATE_FIELDS, kwargs))
+        @transport.request(:post, "#{svc_root}/Users/#{encode_path_segment(user_sid)}",
+                           form: form_params(USER_UPDATE_FIELDS, kwargs))
       )
     end
 
     def delete_user(user_sid)
-      @transport.request(:delete, "#{svc_root}/Users/#{user_sid}")
+      @transport.request(:delete, "#{svc_root}/Users/#{encode_path_segment(user_sid)}")
       nil
     end
 
@@ -1100,12 +1075,12 @@ module VoiceML
 
     def fetch_binding(sid)
       ConversationsV1ServiceBinding.from_hash(
-        @transport.request(:get, "#{svc_root}/Bindings/#{sid}")
+        @transport.request(:get, "#{svc_root}/Bindings/#{encode_path_segment(sid)}")
       )
     end
 
     def delete_binding(sid)
-      @transport.request(:delete, "#{svc_root}/Bindings/#{sid}")
+      @transport.request(:delete, "#{svc_root}/Bindings/#{encode_path_segment(sid)}")
       nil
     end
 
@@ -1119,7 +1094,7 @@ module VoiceML
     def update_configuration(**kwargs)
       ConversationsV1ServiceConfiguration.from_hash(
         @transport.request(:post, "#{svc_root}/Configuration",
-                           form: build_form(CONFIG_UPDATE_FIELDS, kwargs))
+                           form: form_params(CONFIG_UPDATE_FIELDS, kwargs))
       )
     end
 
@@ -1133,7 +1108,7 @@ module VoiceML
     def update_notifications(**kwargs)
       ConversationsV1ServiceNotification.from_hash(
         @transport.request(:post, "#{svc_root}/Configuration/Notifications",
-                           form: build_form(NOTIFICATION_UPDATE_FIELDS, kwargs))
+                           form: form_params(NOTIFICATION_UPDATE_FIELDS, kwargs))
       )
     end
 
@@ -1147,21 +1122,21 @@ module VoiceML
     def update_webhook_configuration(**kwargs)
       ConversationsV1ServiceWebhookConfiguration.from_hash(
         @transport.request(:post, "#{svc_root}/Configuration/Webhooks",
-                           form: build_form(WEBHOOK_CONFIG_UPDATE_FIELDS, kwargs))
+                           form: form_params(WEBHOOK_CONFIG_UPDATE_FIELDS, kwargs))
       )
     end
 
     private
 
     def svc_root
-      "/v1/Services/#{@chat_service_sid}"
+      "/v1/Services/#{encode_path_segment(@chat_service_sid)}"
     end
 
     def conv_root
       "#{svc_root}/Conversations"
     end
 
-    def build_form(map, kwargs)
+    def form_params(map, kwargs)
       out = {}
       map.each do |wire, k|
         value = kwargs[k]

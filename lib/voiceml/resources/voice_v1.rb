@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 require_relative '../models/voice_v1'
 
 module VoiceML
@@ -20,6 +22,8 @@ module VoiceML
 
   # /v1/IpRecords + /v1/IpRecords/{Sid}
   class VoiceV1IpRecordsResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
@@ -38,23 +42,25 @@ module VoiceML
     end
 
     def fetch(sid)
-      VoiceV1IpRecord.from_hash(@transport.request(:get, "/v1/IpRecords/#{sid}"))
+      VoiceV1IpRecord.from_hash(@transport.request(:get, "/v1/IpRecords/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, friendly_name: nil)
       form = {}
       form['FriendlyName'] = friendly_name unless friendly_name.nil?
-      VoiceV1IpRecord.from_hash(@transport.request(:post, "/v1/IpRecords/#{sid}", form: form))
+      VoiceV1IpRecord.from_hash(@transport.request(:post, "/v1/IpRecords/#{encode_path_segment(sid)}", form: form))
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/IpRecords/#{sid}")
+      @transport.request(:delete, "/v1/IpRecords/#{encode_path_segment(sid)}")
       nil
     end
   end
 
   # /v1/SourceIpMappings + /v1/SourceIpMappings/{Sid}
   class VoiceV1SourceIpMappingsResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
@@ -71,22 +77,24 @@ module VoiceML
     end
 
     def fetch(sid)
-      VoiceV1SourceIpMapping.from_hash(@transport.request(:get, "/v1/SourceIpMappings/#{sid}"))
+      VoiceV1SourceIpMapping.from_hash(@transport.request(:get, "/v1/SourceIpMappings/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, sip_domain_sid:)
       form = { 'SipDomainSid' => sip_domain_sid }
-      VoiceV1SourceIpMapping.from_hash(@transport.request(:post, "/v1/SourceIpMappings/#{sid}", form: form))
+      VoiceV1SourceIpMapping.from_hash(@transport.request(:post, "/v1/SourceIpMappings/#{encode_path_segment(sid)}", form: form))
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/SourceIpMappings/#{sid}")
+      @transport.request(:delete, "/v1/SourceIpMappings/#{encode_path_segment(sid)}")
       nil
     end
   end
 
   # /v1/ByocTrunks + /v1/ByocTrunks/{Sid}
   class VoiceV1ByocTrunksResource
+    include V1Pages
+    include FieldMapping
     TRUNK_FIELDS = {
       'FriendlyName' => :friendly_name,
       'VoiceUrl' => :voice_url,
@@ -111,38 +119,28 @@ module VoiceML
     end
 
     def create(**kwargs)
-      VoiceV1ByocTrunk.from_hash(@transport.request(:post, '/v1/ByocTrunks', form: build_form(kwargs)))
+      VoiceV1ByocTrunk.from_hash(@transport.request(:post, '/v1/ByocTrunks', form: form_params(TRUNK_FIELDS, kwargs)))
     end
 
     def fetch(sid)
-      VoiceV1ByocTrunk.from_hash(@transport.request(:get, "/v1/ByocTrunks/#{sid}"))
+      VoiceV1ByocTrunk.from_hash(@transport.request(:get, "/v1/ByocTrunks/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, **kwargs)
-      VoiceV1ByocTrunk.from_hash(@transport.request(:post, "/v1/ByocTrunks/#{sid}", form: build_form(kwargs)))
+      VoiceV1ByocTrunk.from_hash(@transport.request(:post, "/v1/ByocTrunks/#{encode_path_segment(sid)}", form: form_params(TRUNK_FIELDS, kwargs)))
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/ByocTrunks/#{sid}")
+      @transport.request(:delete, "/v1/ByocTrunks/#{encode_path_segment(sid)}")
       nil
     end
 
-    private
-
-    def build_form(kwargs)
-      out = {}
-      TRUNK_FIELDS.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        out[wire] = value
-      end
-      out
-    end
   end
 
   # /v1/ConnectionPolicies + /v1/ConnectionPolicies/{Sid} + nested /Targets
   class VoiceV1ConnectionPoliciesResource
+    include V1Pages
+    include FieldMapping
     TARGET_FIELDS = {
       'Target' => :target,
       'FriendlyName' => :friendly_name,
@@ -168,17 +166,17 @@ module VoiceML
     end
 
     def fetch(sid)
-      VoiceV1ConnectionPolicy.from_hash(@transport.request(:get, "/v1/ConnectionPolicies/#{sid}"))
+      VoiceV1ConnectionPolicy.from_hash(@transport.request(:get, "/v1/ConnectionPolicies/#{encode_path_segment(sid)}"))
     end
 
     def update(sid, friendly_name: nil)
       form = {}
       form['FriendlyName'] = friendly_name unless friendly_name.nil?
-      VoiceV1ConnectionPolicy.from_hash(@transport.request(:post, "/v1/ConnectionPolicies/#{sid}", form: form))
+      VoiceV1ConnectionPolicy.from_hash(@transport.request(:post, "/v1/ConnectionPolicies/#{encode_path_segment(sid)}", form: form))
     end
 
     def delete(sid)
-      @transport.request(:delete, "/v1/ConnectionPolicies/#{sid}")
+      @transport.request(:delete, "/v1/ConnectionPolicies/#{encode_path_segment(sid)}")
       nil
     end
 
@@ -187,52 +185,47 @@ module VoiceML
       params = {}
       params['PageSize'] = page_size unless page_size.nil?
       VoiceV1ConnectionPolicyTargetList.new(
-        @transport.request(:get, "/v1/ConnectionPolicies/#{connection_policy_sid}/Targets", params: params)
+        @transport.request(:get, "/v1/ConnectionPolicies/#{encode_path_segment(connection_policy_sid)}/Targets", params: params)
       )
     end
 
     def create_target(connection_policy_sid, target:, friendly_name: nil, priority: nil, weight: nil, enabled: nil)
       kwargs = { target: target, friendly_name: friendly_name, priority: priority, weight: weight, enabled: enabled }
       VoiceV1ConnectionPolicyTarget.from_hash(
-        @transport.request(:post, "/v1/ConnectionPolicies/#{connection_policy_sid}/Targets",
+        @transport.request(:post, "/v1/ConnectionPolicies/#{encode_path_segment(connection_policy_sid)}/Targets",
                            form: build_target_form(kwargs))
       )
     end
 
     def fetch_target(connection_policy_sid, sid)
       VoiceV1ConnectionPolicyTarget.from_hash(
-        @transport.request(:get, "/v1/ConnectionPolicies/#{connection_policy_sid}/Targets/#{sid}")
+        @transport.request(:get, "/v1/ConnectionPolicies/#{encode_path_segment(connection_policy_sid)}/Targets/#{encode_path_segment(sid)}")
       )
     end
 
     def update_target(connection_policy_sid, sid, **kwargs)
       VoiceV1ConnectionPolicyTarget.from_hash(
-        @transport.request(:post, "/v1/ConnectionPolicies/#{connection_policy_sid}/Targets/#{sid}",
+        @transport.request(:post, "/v1/ConnectionPolicies/#{encode_path_segment(connection_policy_sid)}/Targets/#{encode_path_segment(sid)}",
                            form: build_target_form(kwargs))
       )
     end
 
     def delete_target(connection_policy_sid, sid)
-      @transport.request(:delete, "/v1/ConnectionPolicies/#{connection_policy_sid}/Targets/#{sid}")
+      @transport.request(:delete, "/v1/ConnectionPolicies/#{encode_path_segment(connection_policy_sid)}/Targets/#{encode_path_segment(sid)}")
       nil
     end
 
     private
 
     def build_target_form(kwargs)
-      out = {}
-      TARGET_FIELDS.each do |wire, k|
-        value = kwargs[k]
-        next if value.nil?
-
-        out[wire] = value
-      end
-      out
+      form_params(TARGET_FIELDS, kwargs)
     end
   end
 
   # /v1/Settings — DialingPermissions inheritance toggle (singleton).
   class VoiceV1DialingPermissionsResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end

@@ -15,6 +15,7 @@ module VoiceML
 
   # SipDomain — `SD...` resource.
   class SipDomain
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid domain_name api_version friendly_name auth_type
       voice_url voice_method voice_fallback_url voice_fallback_method
@@ -25,15 +26,18 @@ module VoiceML
     ].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class SipDomainList
+    include RawAttributes
     include Pageable
     attr_reader :domains
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @domains = (hash['domains'] || []).map { |h| SipDomain.from_hash(h) }
     end
@@ -42,20 +46,24 @@ module VoiceML
 
   # SipCredentialList — `CL...`.
   class SipCredentialList
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid friendly_name date_created date_updated uri subresource_uris
     ].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class SipCredentialListList
+    include RawAttributes
     include Pageable
     attr_reader :credential_lists
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @credential_lists = (hash['credential_lists'] || []).map { |h| SipCredentialList.from_hash(h) }
     end
@@ -64,13 +72,15 @@ module VoiceML
 
   # SipCredential — `CR...`. Password is write-only (never returned).
   class SipCredential
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid credential_list_sid username
       date_created date_updated uri
     ].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
@@ -78,9 +88,11 @@ module VoiceML
   # SipCredentialListPage — spec name is `SipCredentialListPage` but it's a page of
   # CREDENTIALS (not credential-lists), mirroring Twilio.
   class SipCredentialListPage
+    include RawAttributes
     include Pageable
     attr_reader :credentials
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @credentials = (hash['credentials'] || []).map { |h| SipCredential.from_hash(h) }
     end
@@ -89,20 +101,24 @@ module VoiceML
 
   # SipIpAccessControlList — `AL...`.
   class SipIpAccessControlList
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid friendly_name date_created date_updated uri subresource_uris
     ].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class SipIpAccessControlListList
+    include RawAttributes
     include Pageable
     attr_reader :ip_access_control_lists
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @ip_access_control_lists = (hash['ip_access_control_lists'] || []).map { |h| SipIpAccessControlList.from_hash(h) }
     end
@@ -111,6 +127,7 @@ module VoiceML
 
   # SipIpAddress — `IP...`.
   class SipIpAddress
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid ip_access_control_list_sid
       friendly_name ip_address cidr_prefix_length
@@ -118,15 +135,18 @@ module VoiceML
     ].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class SipIpAddressList
+    include RawAttributes
     include Pageable
     attr_reader :ip_addresses
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @ip_addresses = (hash['ip_addresses'] || []).map { |h| SipIpAddress.from_hash(h) }
     end
@@ -137,20 +157,24 @@ module VoiceML
   # `sid` echoes the bound resource (CL... for credential mappings, AL... for IP-ACL);
   # `domain_sid` records which domain the binding is attached to.
   class SipDomainMapping
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid friendly_name domain_sid date_created date_updated uri
     ].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   class SipCredentialListMappingList
+    include RawAttributes
     include Pageable
     attr_reader :credential_list_mappings
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @credential_list_mappings = (hash['credential_list_mappings'] || []).map { |h| SipDomainMapping.from_hash(h) }
     end
@@ -158,9 +182,11 @@ module VoiceML
   end
 
   class SipIpAccessControlListMappingList
+    include RawAttributes
     include Pageable
     attr_reader :ip_access_control_list_mappings
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @ip_access_control_list_mappings = (hash['ip_access_control_list_mappings'] || []).map { |h| SipDomainMapping.from_hash(h) }
     end
@@ -173,9 +199,11 @@ module VoiceML
   # the same list shape is reused across CredentialList and IpAccessControlList
   # auth mappings; the inner items decode as SipDomainMapping either way.
   class SipAuthMappingList
+    include RawAttributes
     include Pageable
     attr_reader :contents
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @contents = (hash['contents'] || []).map { |h| SipDomainMapping.from_hash(h) }
     end

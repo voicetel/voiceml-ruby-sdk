@@ -31,7 +31,7 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
   let(:is_sid) { 'IS' + ('0' * 32) }
   let(:qq_sid) { 'QQ' + ('1' * 32) }
 
-  let(:phone_number) { '+18005551234' }
+  let(:phone_number) { '+14155550100' }
 
   def meta(url: nil)
     { first_page_url: url, next_page_url: nil, previous_page_url: nil,
@@ -289,7 +289,7 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
   describe 'Conversations v1 Messages + Participants + Webhooks + Receipts' do
     let(:msg_body) do
       { sid: im_sid, account_sid: account_sid, conversation_sid: ch_sid,
-        index: 0, author: '+15551234567', body: 'Hello', attributes: '{}',
+        index: 0, author: '+14155550103', body: 'Hello', attributes: '{}',
         date_created: 'x', date_updated: 'x', url: 'x' }.to_json
     end
     let(:participant_body) do
@@ -310,10 +310,10 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
 
     it 'create_message POSTs Author + Body + Attributes' do
       stub_request(:post, "#{base_url}/v1/Conversations/#{ch_sid}/Messages")
-        .with(body: hash_including('Author' => '+15551234567', 'Body' => 'Hello'))
+        .with(body: hash_including('Author' => '+14155550103', 'Body' => 'Hello'))
         .to_return(status: 201, body: msg_body, headers: { 'Content-Type' => 'application/json' })
       m = client.conversations_v1.conversations.create_message(ch_sid,
-            author: '+15551234567', body: 'Hello')
+            author: '+14155550103', body: 'Hello')
       expect(m.sid).to eq(im_sid)
       expect(m.index).to eq(0)
     end
@@ -321,10 +321,10 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
     it 'create_participant POSTs MessagingBinding.Address' do
       stub_request(:post, "#{base_url}/v1/Conversations/#{ch_sid}/Participants")
         .with(body: hash_including('Identity' => 'alice',
-                                    'MessagingBinding.Address' => '+18005550000'))
+                                    'MessagingBinding.Address' => '+14155550101'))
         .to_return(status: 201, body: participant_body, headers: { 'Content-Type' => 'application/json' })
       p = client.conversations_v1.conversations.create_participant(ch_sid,
-            identity: 'alice', messaging_binding_address: '+18005550000')
+            identity: 'alice', messaging_binding_address: '+14155550101')
       expect(p.sid).to eq(mb_sid)
     end
 
@@ -435,7 +435,7 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
         url: "#{base_url}/v1/Configuration/Webhooks" }.to_json
     end
     let(:addr_body) do
-      { sid: ig_sid, account_sid: account_sid, type: 'sms', address: '+18005551234',
+      { sid: ig_sid, account_sid: account_sid, type: 'sms', address: '+14155550100',
         friendly_name: 'Inbound SMS',
         date_created: 'x', date_updated: 'x', url: 'x' }.to_json
     end
@@ -469,7 +469,7 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
     it 'create_address POSTs Type + Address + AutoCreation.* + AddressCountry' do
       stub_request(:post, "#{base_url}/v1/Configuration/Addresses")
         .with(body: hash_including('Type' => 'sms',
-                                    'Address' => '+18005551234',
+                                    'Address' => '+14155550100',
                                     'FriendlyName' => 'Inbound SMS',
                                     'AutoCreation.Enabled' => 'true',
                                     'AutoCreation.Type' => 'webhook',
@@ -477,7 +477,7 @@ RSpec.describe 'VoiceML v0.9.0 — Voice v1, Conversations v1, Routes V2 PhoneNu
                                     'AddressCountry' => 'US'))
         .to_return(status: 201, body: addr_body, headers: { 'Content-Type' => 'application/json' })
       a = client.conversations_v1.configuration.create_address(
-        type: 'sms', address: '+18005551234', friendly_name: 'Inbound SMS',
+        type: 'sms', address: '+14155550100', friendly_name: 'Inbound SMS',
         auto_creation_enabled: true, auto_creation_type: 'webhook',
         auto_creation_webhook_url: 'https://example.com/auto',
         address_country: 'US'

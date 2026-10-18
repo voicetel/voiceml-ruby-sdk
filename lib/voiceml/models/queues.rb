@@ -5,6 +5,7 @@ require_relative 'common'
 module VoiceML
   # A Twilio-compatible Queue resource.
   class Queue
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid friendly_name current_size max_size
       average_wait_time date_created date_updated uri
@@ -13,6 +14,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)
@@ -28,11 +30,13 @@ module VoiceML
 
   # Paginated `GET /Queues` response.
   class QueueList
+    include RawAttributes
     include Pageable
 
     attr_reader :queues
 
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @queues = (hash['queues'] || []).map { |q| Queue.from_hash(q) }
     end
@@ -44,6 +48,7 @@ module VoiceML
 
   # A member (call) waiting in a queue.
   class QueueMember
+    include RawAttributes
     ATTRIBUTES = %w[
       call_sid queue_sid account_sid date_enqueued wait_time position uri
     ].freeze
@@ -51,6 +56,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)
@@ -66,11 +72,13 @@ module VoiceML
 
   # Paginated `GET /Queues/{Sid}/Members` response.
   class QueueMemberList
+    include RawAttributes
     include Pageable
 
     attr_reader :queue_members
 
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @queue_members = (hash['queue_members'] || []).map { |m| QueueMember.from_hash(m) }
     end

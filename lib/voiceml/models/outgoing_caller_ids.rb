@@ -7,6 +7,7 @@ module VoiceML
   # to mirror Twilio (caller-id resources share the IncomingPhoneNumber SID
   # space upstream); `phone_number` carries the verified E.164 number.
   class OutgoingCallerId
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid friendly_name phone_number
       date_created date_updated uri
@@ -15,6 +16,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)
@@ -30,11 +32,13 @@ module VoiceML
 
   # Paginated `GET /OutgoingCallerIds` response.
   class OutgoingCallerIdList
+    include RawAttributes
     include Pageable
 
     attr_reader :outgoing_caller_ids
 
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @outgoing_caller_ids =
         (hash['outgoing_caller_ids'] || []).map { |o| OutgoingCallerId.from_hash(o) }
@@ -50,11 +54,13 @@ module VoiceML
   # doesn't exist until the validation_code is dialled back); the
   # `validation_code` is what the user is prompted to enter on the live call.
   class ValidationRequest
+    include RawAttributes
     ATTRIBUTES = %w[account_sid call_sid friendly_name phone_number validation_code].freeze
 
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)

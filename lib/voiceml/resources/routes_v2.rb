@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'base'
+
 require_relative '../models/routes_v2'
 
 module VoiceML
@@ -16,38 +18,42 @@ module VoiceML
   # Operations on /v2/SipDomains/{SipDomain}. Keyed by domain name; account
   # is resolved from HTTP Basic auth.
   class RoutesV2SipDomainsResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
 
     def fetch(domain_name)
-      RoutesV2SipDomain.from_hash(@transport.request(:get, "/v2/SipDomains/#{domain_name}"))
+      RoutesV2SipDomain.from_hash(@transport.request(:get, "/v2/SipDomains/#{encode_path_segment(domain_name)}"))
     end
 
     def update(domain_name, voice_region: nil, friendly_name: nil)
       form = {}
       form['VoiceRegion'] = voice_region unless voice_region.nil?
       form['FriendlyName'] = friendly_name unless friendly_name.nil?
-      RoutesV2SipDomain.from_hash(@transport.request(:post, "/v2/SipDomains/#{domain_name}", form: form))
+      RoutesV2SipDomain.from_hash(@transport.request(:post, "/v2/SipDomains/#{encode_path_segment(domain_name)}", form: form))
     end
   end
 
   # Operations on /v2/PhoneNumbers/{PhoneNumber}. Keyed by E.164 phone number or
   # its PN sid; account resolved from HTTP Basic auth.
   class RoutesV2PhoneNumbersResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
 
     def fetch(phone_number)
-      RoutesV2PhoneNumber.from_hash(@transport.request(:get, "/v2/PhoneNumbers/#{phone_number}"))
+      RoutesV2PhoneNumber.from_hash(@transport.request(:get, "/v2/PhoneNumbers/#{encode_path_segment(phone_number)}"))
     end
 
     def update(phone_number, voice_region: nil, friendly_name: nil)
       form = {}
       form['VoiceRegion'] = voice_region unless voice_region.nil?
       form['FriendlyName'] = friendly_name unless friendly_name.nil?
-      RoutesV2PhoneNumber.from_hash(@transport.request(:post, "/v2/PhoneNumbers/#{phone_number}", form: form))
+      RoutesV2PhoneNumber.from_hash(@transport.request(:post, "/v2/PhoneNumbers/#{encode_path_segment(phone_number)}", form: form))
     end
   end
 end

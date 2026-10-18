@@ -47,7 +47,7 @@ RSpec.describe 'voiceml-ruby v0.6.2' do
           status: 200,
           body: {
             recordings: [base_attrs.merge('media_url' => url)],
-            page: 0, page_size: 50, total: 1
+            page: 0, page_size: 50
           }.to_json,
           headers: { 'Content-Type' => 'application/json' }
         )
@@ -64,7 +64,7 @@ RSpec.describe 'voiceml-ruby v0.6.2' do
       {
         'sid' => pn_sid,
         'account_sid' => ACCOUNT_SID,
-        'phone_number' => '+18005551234',
+        'phone_number' => '+14155550100',
         'friendly_name' => '',
         'api_version' => '2010-04-01',
         'uri' => "/2010-04-01/Accounts/#{ACCOUNT_SID}/IncomingPhoneNumbers/#{pn_sid}.json",

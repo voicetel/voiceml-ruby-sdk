@@ -12,6 +12,7 @@ module VoiceML
   # Twilio-compat fields VoiceML doesn't track (regulatory, SMS, emergency, trunking) are
   # surfaced verbatim so strict-binding consumers can read e.g. `.capabilities['voice']`.
   class IncomingPhoneNumber
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid phone_number friendly_name api_version uri
       voice_url voice_method voice_fallback_url voice_fallback_method
@@ -27,6 +28,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)
@@ -42,11 +44,13 @@ module VoiceML
 
   # Paginated `GET /IncomingPhoneNumbers` response. Same envelope shape as `CallList`.
   class IncomingPhoneNumberList
+    include RawAttributes
     include Pageable
 
     attr_reader :incoming_phone_numbers
 
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @incoming_phone_numbers =
         (hash['incoming_phone_numbers'] || []).map { |n| IncomingPhoneNumber.from_hash(n) }

@@ -2,12 +2,12 @@
 
 module VoiceML
   # Twilio-compatible pagination envelope fields. Mix into list-response classes to expose
-  # `page`, `page_size`, `total`, `next_page_uri`, `previous_page_uri`, `first_page_uri`,
-  # `uri`, `num_pages`, `start`, `end`. The list items themselves are declared on each
-  # concrete subclass (`calls`, `conferences`, etc).
+  # `page`, `page_size`, `start`, `end`, `first_page_uri`, `next_page_uri`, `previous_page_uri`,
+  # `uri`. The list items themselves are declared on each concrete subclass (`calls`,
+  # `conferences`, etc).
   module Pageable
     PAGE_FIELDS = %w[
-      page page_size num_pages total start end
+      page page_size start end
       first_page_uri next_page_uri previous_page_uri uri
     ].freeze
 
@@ -19,6 +19,37 @@ module VoiceML
       PAGE_FIELDS.each do |field|
         instance_variable_set("@#{field}", hash[field])
       end
+    end
+  end
+
+  # Shared `meta` envelope for `/v1/*` list responses.
+  module V1Pageable
+    META_FIELDS = %w[first_page_url next_page_url previous_page_url url page page_size key].freeze
+
+    META_FIELDS.each { |f| attr_reader f.to_sym }
+
+    def assign_meta_fields(hash)
+      meta = hash['meta'] || {}
+      META_FIELDS.each { |f| instance_variable_set("@#{f}", meta[f]) }
+    end
+  end
+
+  # Mixed into every response model: keeps the raw wire hash readable via
+  # `#to_h` / `#[]` so fields the SDK does not model yet (or newly added
+  # server-side) stay accessible without an SDK release. Unknown fields are
+  # ignored by the typed readers.
+  module RawAttributes
+    # The raw response hash this model was decoded from.
+    def to_h
+      @raw_attributes ||= {}
+    end
+
+    # Read one field from the raw response hash, by either its wire (string)
+    # or symbol name. Returns `nil` for absent fields; `false` round-trips.
+    def [](key)
+      raw = to_h
+      string_key = key.to_s
+      raw.key?(string_key) ? raw[string_key] : raw[key.to_sym]
     end
   end
 

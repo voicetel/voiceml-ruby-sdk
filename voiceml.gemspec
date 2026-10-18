@@ -10,17 +10,18 @@ Gem::Specification.new do |spec|
 
   spec.summary       = 'Official Ruby SDK for the VoiceML REST API'
   spec.description   = 'Twilio-compatible voice + AMD service from VoiceTel'
-  spec.homepage      = 'https://voiceml.voicetel.com'
+  spec.homepage      = 'https://github.com/voicetel/voiceml-ruby-sdk'
   spec.license       = 'MIT'
 
-  spec.required_ruby_version = '>= 3.0'
+  spec.required_ruby_version = '>= 3.1'
 
   spec.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
   spec.require_paths = ['lib']
 
   spec.metadata = {
-    'documentation_uri' => 'https://voiceml.voicetel.com',
-    'source_code_uri'   => 'https://voiceml.voicetel.com',
+    'documentation_uri' => 'https://voicetel.com/docs/api/v0.9/voiceml/',
+    'source_code_uri' => 'https://github.com/voicetel/voiceml-ruby-sdk',
+    'changelog_uri' => 'https://github.com/voicetel/voiceml-ruby-sdk/releases',
     'rubygems_mfa_required' => 'true'
   }
 

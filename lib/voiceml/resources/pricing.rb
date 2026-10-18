@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'uri'
+require_relative "base"
 
 require_relative '../models/pricing'
 
@@ -42,6 +42,8 @@ module VoiceML
 
   # `.../Countries` list + per-country fetch. `model` is the fetch body class.
   class PricingCountriesResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport, base_path, model)
       @transport = transport
       @base      = base_path
@@ -55,25 +57,29 @@ module VoiceML
     end
 
     def fetch(iso_country)
-      @model.from_hash(@transport.request(:get, "#{@base}/#{iso_country}"))
+      @model.from_hash(@transport.request(:get, "#{@base}/#{encode_path_segment(iso_country)}"))
     end
   end
 
   # `/v1/Voice/Numbers/{Number}` — single-number fetch.
   class PricingV1VoiceNumbersResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
 
     def fetch(number)
       PricingVoiceNumber.from_hash(
-        @transport.request(:get, "/v1/Voice/Numbers/#{URI.encode_www_form_component(number)}")
+        @transport.request(:get, "/v1/Voice/Numbers/#{encode_path_segment(number)}")
       )
     end
   end
 
   # `/v2/Voice/Numbers/{Destination}` — origin-aware single-number fetch.
   class PricingV2VoiceNumbersResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
@@ -82,7 +88,7 @@ module VoiceML
       params = {}
       params['OriginationNumber'] = origination_number unless origination_number.nil?
       PricingVoiceNumberV2.from_hash(
-        @transport.request(:get, "/v2/Voice/Numbers/#{URI.encode_www_form_component(destination_number)}",
+        @transport.request(:get, "/v2/Voice/Numbers/#{encode_path_segment(destination_number)}",
                            params: params)
       )
     end
@@ -90,6 +96,8 @@ module VoiceML
 
   # `/v2/Trunking/Numbers/{Destination}` — origin-aware single-number fetch.
   class PricingV2TrunkingNumbersResource
+    include V1Pages
+    include FieldMapping
     def initialize(transport)
       @transport = transport
     end
@@ -98,7 +106,7 @@ module VoiceML
       params = {}
       params['OriginationNumber'] = origination_number unless origination_number.nil?
       PricingTrunkingNumber.from_hash(
-        @transport.request(:get, "/v2/Trunking/Numbers/#{URI.encode_www_form_component(destination_number)}",
+        @transport.request(:get, "/v2/Trunking/Numbers/#{encode_path_segment(destination_number)}",
                            params: params)
       )
     end

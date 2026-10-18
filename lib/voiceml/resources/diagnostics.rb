@@ -1,64 +1,49 @@
 # frozen_string_literal: true
 
-require 'json'
-require 'net/http'
-require 'uri'
-
 require_relative '../models/diagnostics'
 
 module VoiceML
   # Diagnostic surfaces — `/health` and the OpenAPI doc endpoints.
   #
   # These don't sit under `/2010-04-01/Accounts/{AccountSid}/...`; they're mounted at the
-  # server root and don't require auth (the spec marks them `security: []`).
+  # server root and require no credentials (the spec marks them `security: []`), so every
+  # call routes through the normal transport — the configured HTTP client, timeout, proxy
+  # and User-Agent apply — with auth omitted.
   class DiagnosticsResource
     def initialize(transport)
       @transport = transport
     end
 
     # Hit `GET /health`. 200 = all hard checks pass; 503 raises `VoiceML::ServerError`
-    # with the failure list on `error.body`.
+    # with the failure list on `error.body`. `warnings`/`failures` are optional in the
+    # response body.
     #
     # @return [VoiceML::HealthStatus]
     def health
-      HealthStatus.from_hash(unauth_request('/health'))
+      HealthStatus.from_hash(@transport.request(:get, '/health', auth: false))
     end
 
     # Fetch the OpenAPI spec as parsed JSON.
     #
     # @return [Hash]
     def openapi_json
-      unauth_request('/openapi.json')
+      @transport.request(:get, '/openapi.json', auth: false)
     end
 
-    private
+    # Fetch the OpenAPI spec as raw YAML (`/openapi.yaml`).
+    #
+    # @return [String]
+    def openapi_yaml
+      _status, body, _headers = @transport.request_raw(:get, '/openapi.yaml', auth: false)
+      body
+    end
 
-    def unauth_request(path)
-      uri = URI.parse("#{@transport.base_url}#{path}")
-      req = Net::HTTP::Get.new(uri)
-      req['Accept']     = 'application/json'
-      req['User-Agent'] = @transport.user_agent
-      http = Net::HTTP.new(uri.host, uri.port)
-      http.use_ssl     = uri.scheme == 'https'
-      http.open_timeout = 10
-      http.read_timeout = 10
-      response = http.start { |h| h.request(req) }
-
-      status = response.code.to_i
-      unless status >= 200 && status < 300
-        body = begin
-          response.body && !response.body.empty? ? JSON.parse(response.body) : response.body
-        rescue JSON::ParserError
-          response.body
-        end
-        message = body.is_a?(Hash) && body['message'].is_a?(String) ? body['message'] : "HTTP #{status}"
-        more_info = body.is_a?(Hash) && body['more_info'].is_a?(String) ? body['more_info'] : nil
-        raise VoiceML.error_from_response(status, message, body: body, more_info: more_info)
-      end
-
-      return nil if response.body.nil? || response.body.empty?
-
-      JSON.parse(response.body)
+    # Fetch the OpenAPI spec as raw YAML (`/openapi.yml`).
+    #
+    # @return [String]
+    def openapi_yml
+      _status, body, _headers = @transport.request_raw(:get, '/openapi.yml', auth: false)
+      body
     end
   end
 end

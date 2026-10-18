@@ -13,6 +13,7 @@ module VoiceML
   #
   # The same resource shape backs both account-scoped and call-scoped fetches.
   class Notification
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid call_sid api_version
       error_code more_info message_date message_text log
@@ -24,6 +25,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)

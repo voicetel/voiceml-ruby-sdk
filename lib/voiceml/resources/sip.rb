@@ -2,16 +2,18 @@
 
 require_relative 'base'
 require_relative '../models/sip'
+require_relative '../models/sip_registrations'
 
 module VoiceML
   # `client.sip` — top-level SIP Trunking holder.
   class SipResource
-    attr_reader :domains, :credential_lists, :ip_access_control_lists
+    attr_reader :domains, :credential_lists, :ip_access_control_lists, :registrations
 
     def initialize(transport)
       @domains = SipDomainsResource.new(transport)
       @credential_lists = SipCredentialListsResource.new(transport)
       @ip_access_control_lists = SipIpAccessControlListsResource.new(transport)
+      @registrations = SipRegistrationsResource.new(transport)
     end
   end
 
@@ -33,9 +35,10 @@ module VoiceML
     }.freeze
 
     PAGE_FIELDS = { 'Page' => :page, 'PageSize' => :page_size, 'PageToken' => :page_token }.freeze
+    LIST_FIELDS = { 'FriendlyName' => :friendly_name, 'Page' => :page, 'PageSize' => :page_size, 'PageToken' => :page_token }.freeze
 
     def list(**kwargs)
-      SipDomainList.new(@transport.request(:get, path('SIP', 'Domains'), params: form_params(PAGE_FIELDS, kwargs)))
+      SipDomainList.new(@transport.request(:get, path('SIP', 'Domains'), params: form_params(LIST_FIELDS, kwargs)))
     end
 
     def create(domain_name:, **kwargs)
@@ -130,12 +133,14 @@ module VoiceML
   # /SIP/CredentialLists + /Credentials sub-resource.
   class SipCredentialListsResource < BaseResource
     PAGE_FIELDS = { 'Page' => :page, 'PageSize' => :page_size, 'PageToken' => :page_token }.freeze
+    LIST_FIELDS = { 'FriendlyName' => :friendly_name, 'Page' => :page, 'PageSize' => :page_size, 'PageToken' => :page_token }.freeze
 
     def list(**kwargs)
-      SipCredentialListList.new(@transport.request(:get, path('SIP', 'CredentialLists'), params: form_params(PAGE_FIELDS, kwargs)))
+      SipCredentialListList.new(@transport.request(:get, path('SIP', 'CredentialLists'), params: form_params(LIST_FIELDS, kwargs)))
     end
-    def create(friendly_name:)
-      SipCredentialList.from_hash(@transport.request(:post, path('SIP', 'CredentialLists'), form: { 'FriendlyName' => friendly_name }))
+    def create(friendly_name: nil)
+      form = friendly_name.nil? ? {} : { 'FriendlyName' => friendly_name }
+      SipCredentialList.from_hash(@transport.request(:post, path('SIP', 'CredentialLists'), form: form))
     end
     def fetch(credential_list_sid)
       SipCredentialList.from_hash(@transport.request(:get, path('SIP', 'CredentialLists', credential_list_sid)))
@@ -158,8 +163,9 @@ module VoiceML
     def fetch_credential(credential_list_sid, credential_sid)
       SipCredential.from_hash(@transport.request(:get, path('SIP', 'CredentialLists', credential_list_sid, 'Credentials', credential_sid)))
     end
-    def update_credential(credential_list_sid, credential_sid, password:)
-      SipCredential.from_hash(@transport.request(:post, path('SIP', 'CredentialLists', credential_list_sid, 'Credentials', credential_sid), form: { 'Password' => password }))
+    def update_credential(credential_list_sid, credential_sid, password: nil)
+      form = password.nil? ? {} : { 'Password' => password }
+      SipCredential.from_hash(@transport.request(:post, path('SIP', 'CredentialLists', credential_list_sid, 'Credentials', credential_sid), form: form))
     end
     def delete_credential(credential_list_sid, credential_sid)
       @transport.request(:delete, path('SIP', 'CredentialLists', credential_list_sid, 'Credentials', credential_sid)); nil
@@ -169,13 +175,15 @@ module VoiceML
   # /SIP/IpAccessControlLists + /IpAddresses sub-resource.
   class SipIpAccessControlListsResource < BaseResource
     PAGE_FIELDS = { 'Page' => :page, 'PageSize' => :page_size, 'PageToken' => :page_token }.freeze
+    LIST_FIELDS = { 'FriendlyName' => :friendly_name, 'Page' => :page, 'PageSize' => :page_size, 'PageToken' => :page_token }.freeze
     IP_FIELDS = { 'FriendlyName' => :friendly_name, 'IpAddress' => :ip_address, 'CidrPrefixLength' => :cidr_prefix_length }.freeze
 
     def list(**kwargs)
-      SipIpAccessControlListList.new(@transport.request(:get, path('SIP', 'IpAccessControlLists'), params: form_params(PAGE_FIELDS, kwargs)))
+      SipIpAccessControlListList.new(@transport.request(:get, path('SIP', 'IpAccessControlLists'), params: form_params(LIST_FIELDS, kwargs)))
     end
-    def create(friendly_name:)
-      SipIpAccessControlList.from_hash(@transport.request(:post, path('SIP', 'IpAccessControlLists'), form: { 'FriendlyName' => friendly_name }))
+    def create(friendly_name: nil)
+      form = friendly_name.nil? ? {} : { 'FriendlyName' => friendly_name }
+      SipIpAccessControlList.from_hash(@transport.request(:post, path('SIP', 'IpAccessControlLists'), form: form))
     end
     def fetch(acl_sid)
       SipIpAccessControlList.from_hash(@transport.request(:get, path('SIP', 'IpAccessControlLists', acl_sid)))
@@ -190,7 +198,7 @@ module VoiceML
 
     # /IpAddresses sub-resource
     def list_ip_addresses(acl_sid, **kwargs)
-      SipIpAddressList.new(@transport.request(:get, path('SIP', 'IpAccessControlLists', acl_sid, 'IpAddresses'), params: form_params(PAGE_FIELDS, kwargs)))
+      SipIpAddressList.new(@transport.request(:get, path('SIP', 'IpAccessControlLists', acl_sid, 'IpAddresses'), params: form_params(LIST_FIELDS, kwargs)))
     end
     def create_ip_address(acl_sid, friendly_name:, ip_address:, cidr_prefix_length: nil)
       form = { 'FriendlyName' => friendly_name, 'IpAddress' => ip_address }
@@ -205,6 +213,17 @@ module VoiceML
     end
     def delete_ip_address(acl_sid, ip_address_sid)
       @transport.request(:delete, path('SIP', 'IpAccessControlLists', acl_sid, 'IpAddresses', ip_address_sid)); nil
+    end
+  end
+
+  # /SIP/Registrations — live registrations on the tenant's SIP Domains.
+  class SipRegistrationsResource < BaseResource
+    LIST_FIELDS = { 'Page' => :page, 'PageSize' => :page_size, 'PageToken' => :page_token }.freeze
+
+    # @return [VoiceML::SipRegistrationList]
+    def list(**kwargs)
+      SipRegistrationList.new(@transport.request(:get, path('SIP', 'Registrations'),
+                                                 params: form_params(LIST_FIELDS, kwargs)))
     end
   end
 end

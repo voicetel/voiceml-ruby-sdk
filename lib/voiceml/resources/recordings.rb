@@ -2,6 +2,7 @@
 
 require_relative 'base'
 require_relative '../models/recordings'
+require_relative '../models/transcriptions'
 
 module VoiceML
   # Account-scoped `/Recordings` operations.
@@ -26,6 +27,15 @@ module VoiceML
       'IncludeSoftDeleted' => :include_soft_deleted
     }.freeze
 
+    LIST_TRANSCRIPTIONS_FIELDS = {
+      'DateCreated'  => :date_created,
+      'DateCreated<' => :date_created_lt,
+      'DateCreated>' => :date_created_gt,
+      'Page'         => :page,
+      'PageSize'     => :page_size,
+      'PageToken'    => :page_token
+    }.freeze
+
     # @return [VoiceML::RecordingList]
     def list(**kwargs)
       RecordingList.from_hash(
@@ -38,12 +48,13 @@ module VoiceML
     def each(**kwargs, &block)
       return enum_for(:each, **kwargs) unless block
 
-      page_num = kwargs.delete(:page) || 0
+      page = list(**kwargs)
       loop do
-        chunk = list(**kwargs, page: page_num)
-        chunk.recordings.each(&block)
-        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.recordings.empty?
-        page_num += 1
+        page.recordings.each(&block)
+        nxt = next_page(page)
+        break if nxt.nil?
+
+        page = nxt
       end
     end
 
@@ -83,6 +94,29 @@ module VoiceML
     # @return [nil]
     def delete(recording_sid)
       @transport.request(:delete, path('Recordings', recording_sid))
+      nil
+    end
+
+    # --- Recording-scoped stored transcriptions ---
+
+    # @return [VoiceML::TranscriptionList]
+    def list_transcriptions(recording_sid, **kwargs)
+      TranscriptionList.from_hash(
+        @transport.request(:get, path('Recordings', recording_sid, 'Transcriptions'),
+                           params: form_params(LIST_TRANSCRIPTIONS_FIELDS, kwargs))
+      )
+    end
+
+    # @return [VoiceML::Transcription]
+    def get_transcription(recording_sid, sid)
+      Transcription.from_hash(
+        @transport.request(:get, path('Recordings', recording_sid, 'Transcriptions', sid))
+      )
+    end
+
+    # @return [nil]
+    def delete_transcription(recording_sid, sid)
+      @transport.request(:delete, path('Recordings', recording_sid, 'Transcriptions', sid))
       nil
     end
   end

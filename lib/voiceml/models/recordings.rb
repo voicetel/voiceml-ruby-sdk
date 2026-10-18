@@ -5,15 +5,17 @@ require_relative 'common'
 module VoiceML
   # A Twilio-compatible Recording resource.
   class Recording
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid call_sid conference_sid status source channels
       duration api_version uri date_created date_updated start_time
-      price price_unit encryption_details subresource_uris media_url error_code
+      price price_unit encryption_details subresource_uris media_url error_code track
     ].freeze
 
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)
@@ -30,11 +32,13 @@ module VoiceML
   # `GET /Recordings` (account-scoped) and `GET /Calls/{Sid}/Recordings` (per-call) response.
   # The per-call form populates only `recordings`; pagination fields remain `nil`.
   class RecordingList
+    include RawAttributes
     include Pageable
 
     attr_reader :recordings
 
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @recordings = (hash['recordings'] || []).map { |r| Recording.from_hash(r) }
     end

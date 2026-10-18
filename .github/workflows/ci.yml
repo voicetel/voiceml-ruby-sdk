@@ -6,13 +6,30 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['3.1', '3.2', '3.3', '3.4']
     steps:
       - uses: actions/checkout@v7
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
-      - run: bundle exec rspec
+      - name: Spec suite under warnings
+        run: bundle exec rspec --format progress
+      - name: Warning check
+        run: |
+          status=0
+          RUBYOPT=-w bundle exec rspec > /tmp/ruby-w.log 2>&1 || status=$?
+          # Warnings from vendored bundler/rubygems internals are environmental.
+          if grep -E 'warning:' /tmp/ruby-w.log | grep -v 'bundler\|rubygems\|vendor/ruby'; then
+            echo 'SDK warnings under ruby -w:'; grep -E 'warning:' /tmp/ruby-w.log | grep -v 'bundler\|rubygems\|vendor/ruby'; exit 1
+          fi
+          exit $status

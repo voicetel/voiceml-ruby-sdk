@@ -43,11 +43,24 @@ module VoiceML
   # HTTP 410 — recording audio is no longer available (no local file, no S3 key).
   class GoneError < ApiError; end
 
-  # HTTP 429 — per-account rate limit exceeded.
-  class RateLimitError < ApiError; end
+  # HTTP 429 — per-account rate limit exceeded. When the server sends a
+  # `Retry-After` header, the parsed delay in seconds is exposed on
+  # `#retry_after`.
+  class RateLimitError < ApiError
+    attr_reader :retry_after
+
+    def retry_after=(seconds)
+      @retry_after = seconds
+    end
+  end
 
   # HTTP 501 — endpoint is mounted as a stub (e.g. UserDefinedMessages).
   class NotImplementedAPIError < ApiError; end
+
+  # The request could not be delivered: connection failures, TLS errors,
+  # timeouts, malformed or refused redirects. The original exception is
+  # preserved as `#cause`.
+  class ConnectionError < ApiError; end
 
   # HTTP 5xx — the server hit an error processing the request.
   class ServerError < ApiError; end

@@ -8,6 +8,7 @@ module VoiceML
   # shape conformance and to round-trip migrated tooling. `parent_sid` ties
   # the media back to its parent Message (SM... sid).
   class Media
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid parent_sid content_type
       date_created date_updated uri
@@ -16,6 +17,7 @@ module VoiceML
     attr_reader(*ATTRIBUTES.map(&:to_sym))
 
     def initialize(attrs = {})
+      @raw_attributes = attrs
       ATTRIBUTES.each do |field|
         value = attrs.key?(field) ? attrs[field] : attrs[field.to_sym]
         instance_variable_set("@#{field}", value)
@@ -32,11 +34,13 @@ module VoiceML
   # Paginated `GET /Messages/{Sid}/Media` response. Twilio's envelope key is
   # `media_list` (not `media`) — the SDK preserves that on the wire.
   class MediaList
+    include RawAttributes
     include Pageable
 
     attr_reader :media_list
 
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_page_fields(hash)
       @media_list = (hash['media_list'] || []).map { |m| Media.from_hash(m) }
     end

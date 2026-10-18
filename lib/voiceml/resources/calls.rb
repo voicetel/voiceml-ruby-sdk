@@ -74,9 +74,6 @@ module VoiceML
       'StartTime'      => :start_time,
       'StartTime<'     => :start_time_lt,
       'StartTime>'     => :start_time_gt,
-      # Note: spec defines `StartTime>=` and `StartTime<=` as the literal query names.
-      'StartTime>='    => :start_time_gte,
-      'StartTime<='    => :start_time_lte,
       'EndTime'        => :end_time,
       'EndTime<'       => :end_time_lt,
       'EndTime>'       => :end_time_gt,
@@ -113,10 +110,16 @@ module VoiceML
     START_RECORDING_FIELDS = {
       'RecordingMaxDuration'           => :recording_max_duration,
       'RecordingChannels'              => :recording_channels,
+      'RecordingTrack'                 => :recording_track,
       'PlayBeep'                       => :play_beep,
       'RecordingStatusCallback'        => :recording_status_callback,
       'RecordingStatusCallbackMethod'  => :recording_status_callback_method,
       'RecordingStatusCallbackEvent'   => :recording_status_callback_event
+    }.freeze
+
+    UPDATE_RECORDING_FIELDS = {
+      'Status'        => :status,
+      'PauseBehavior' => :pause_behavior
     }.freeze
 
     START_STREAM_FIELDS = {
@@ -182,20 +185,23 @@ module VoiceML
       CallList.from_hash(data)
     end
 
-    # Walk every page of /Calls and yield each Call. Returns an Enumerator when
-    # called without a block.
+    # Walk every page of /Calls and yield each Call, following the envelope's
+    # `next_page_uri` verbatim (path + query, including its `PageToken`).
+    # Returns an Enumerator when called without a block; stopping early makes
+    # no further requests.
     #
     # @yield [VoiceML::Call]
     # @return [Enumerator<VoiceML::Call>] when no block given
     def each(**kwargs, &block)
       return enum_for(:each, **kwargs) unless block
 
-      page_num = kwargs.delete(:page) || 0
+      page = list(**kwargs)
       loop do
-        chunk = list(**kwargs, page: page_num)
-        chunk.calls.each(&block)
-        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.calls.empty?
-        page_num += 1
+        page.calls.each(&block)
+        nxt = next_page(page)
+        break if nxt.nil?
+
+        page = nxt
       end
     end
 
@@ -254,10 +260,13 @@ module VoiceML
     end
 
     # @param status [String] one of "in-progress", "paused", "stopped".
+    # @param pause_behavior [String, nil] how a paused recording treats silence
+    #   (e.g. "skip" — see the API docs for `PauseBehavior`).
     # @return [VoiceML::Recording]
-    def update_recording(call_sid, recording_sid, status:)
+    def update_recording(call_sid, recording_sid, status:, pause_behavior: nil)
       data = @transport.request(:post, path('Calls', call_sid, 'Recordings', recording_sid),
-                                form: { 'Status' => status })
+                                form: form_params(UPDATE_RECORDING_FIELDS,
+                                                  { status: status, pause_behavior: pause_behavior }))
       Recording.from_hash(data)
     end
 
@@ -268,22 +277,16 @@ module VoiceML
     end
 
     # --- Streams ---
-
-    # @return [VoiceML::StreamList]
-    def list_streams(call_sid)
-      StreamList.from_hash(@transport.request(:get, path('Calls', call_sid, 'Streams')))
-    end
+    #
+    # Only start (`POST …/Streams`) and stop (`POST …/Streams/{Sid}`) exist;
+    # the list/fetch GETs were removed from the API (the server answers
+    # 405 / error code 20004 for them).
 
     # @return [VoiceML::Stream]
     def start_stream(call_sid, **kwargs)
       data = @transport.request(:post, path('Calls', call_sid, 'Streams'),
                                 form: form_params(START_STREAM_FIELDS, kwargs))
       Stream.from_hash(data)
-    end
-
-    # @return [VoiceML::Stream]
-    def get_stream(call_sid, stream_sid)
-      Stream.from_hash(@transport.request(:get, path('Calls', call_sid, 'Streams', stream_sid)))
     end
 
     # @return [VoiceML::Stream]
@@ -294,24 +297,15 @@ module VoiceML
     end
 
     # --- SIPREC ---
-
-    # @return [VoiceML::SiprecList]
-    def list_siprec(call_sid)
-      SiprecList.from_hash(@transport.request(:get, path('Calls', call_sid, 'Siprec')))
-    end
+    #
+    # Only start (`POST …/Siprec`) and stop (`POST …/Siprec/{Sid}`) exist; the
+    # list/fetch GETs were removed from the API (405 / 20004).
 
     # @return [VoiceML::SiprecSession]
     def start_siprec(call_sid, **kwargs)
       data = @transport.request(:post, path('Calls', call_sid, 'Siprec'),
                                 form: form_params(START_SIPREC_FIELDS, kwargs))
       SiprecSession.from_hash(data)
-    end
-
-    # @return [VoiceML::SiprecSession]
-    def get_siprec(call_sid, siprec_sid)
-      SiprecSession.from_hash(
-        @transport.request(:get, path('Calls', call_sid, 'Siprec', siprec_sid))
-      )
     end
 
     # @return [VoiceML::SiprecSession]
@@ -322,26 +316,17 @@ module VoiceML
     end
 
     # --- Transcriptions ---
-
-    # @return [VoiceML::TranscriptionList]
-    def list_transcriptions(call_sid)
-      TranscriptionList.from_hash(
-        @transport.request(:get, path('Calls', call_sid, 'Transcriptions'))
-      )
-    end
+    #
+    # Only start (`POST …/Transcriptions`) and stop (`POST …/Transcriptions/{Sid}`)
+    # exist on the live call; the list/fetch GETs were removed from the API
+    # (405 / 20004). Stored-recording transcriptions live on
+    # {VoiceML::RecordingsResource} and {VoiceML::TranscriptionsResource}.
 
     # @return [VoiceML::CallTranscription]
     def start_transcription(call_sid, **kwargs)
       data = @transport.request(:post, path('Calls', call_sid, 'Transcriptions'),
                                 form: form_params(START_TRANSCRIPTION_FIELDS, kwargs))
       CallTranscription.from_hash(data)
-    end
-
-    # @return [VoiceML::CallTranscription]
-    def get_transcription(call_sid, transcription_sid)
-      CallTranscription.from_hash(
-        @transport.request(:get, path('Calls', call_sid, 'Transcriptions', transcription_sid))
-      )
     end
 
     # @return [VoiceML::CallTranscription]
@@ -364,7 +349,7 @@ module VoiceML
 
     # @return [Hash]
     def get_notification(call_sid, notification_sid)
-      @transport.request(:get, path('Calls', call_sid, 'Notifications', notification_sid))
+      Notification.from_hash(@transport.request(:get, path('Calls', call_sid, 'Notifications', notification_sid)))
     end
 
     # @return [VoiceML::EventsList]

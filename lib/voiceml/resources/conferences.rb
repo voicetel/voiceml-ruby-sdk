@@ -43,6 +43,12 @@ module VoiceML
       'Status' => :status
     }.freeze
 
+    START_RECORDING_FIELDS = {
+      'RecordingStatusCallback'       => :recording_status_callback,
+      'RecordingStatusCallbackMethod' => :recording_status_callback_method,
+      'RecordingStatusCallbackEvent'  => :recording_status_callback_event
+    }.freeze
+
     LIST_PARTICIPANTS_FIELDS = {
       'Muted'    => :muted,
       'Hold'     => :hold,
@@ -73,12 +79,13 @@ module VoiceML
     def each(**kwargs, &block)
       return enum_for(:each, **kwargs) unless block
 
-      page_num = kwargs.delete(:page) || 0
+      page = list(**kwargs)
       loop do
-        chunk = list(**kwargs, page: page_num)
-        chunk.conferences.each(&block)
-        break if chunk.next_page_uri.nil? || chunk.next_page_uri.empty? || chunk.conferences.empty?
-        page_num += 1
+        page.conferences.each(&block)
+        nxt = next_page(page)
+        break if nxt.nil?
+
+        page = nxt
       end
     end
 
@@ -150,6 +157,20 @@ module VoiceML
         @transport.request(:get, path('Conferences', conference_sid, 'Recordings'),
                            params: form_params(LIST_CALL_RECORDINGS_FIELDS, kwargs))
       )
+    end
+
+    # Start recording a conference. The conference-scoped create accepts only
+    # the recording status callback fields (per-call recording start, with the
+    # full field set, lives on {VoiceML::CallsResource#start_recording}).
+    #
+    # @return [VoiceML::Recording]
+    def start_recording(conference_sid, **kwargs)
+      data = @transport.request(
+        :post,
+        path('Conferences', conference_sid, 'Recordings'),
+        form: form_params(START_RECORDING_FIELDS, kwargs)
+      )
+      Recording.from_hash(data)
     end
 
     # @return [VoiceML::Recording]

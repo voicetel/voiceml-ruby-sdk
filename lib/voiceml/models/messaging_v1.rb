@@ -14,27 +14,60 @@ module VoiceML
   # MessagingService — `MG...`. The feature-toggle fields are accept-and-echo on
   # VoiceML; the service's operative role is gating scheduled sends.
   class MessagingService
+    include RawAttributes
     ATTRIBUTES = %w[
       sid account_sid friendly_name date_created date_updated
       inbound_request_url inbound_method fallback_url fallback_method status_callback
       sticky_sender mms_converter smart_encoding scan_message_content
       fallback_to_long_code area_code_geomatch synchronous_validation validity_period
-      url usecase use_inbound_webhook_on_number
+      url usecase use_inbound_webhook_on_number advanced_opt_out
     ].freeze
     attr_reader(*ATTRIBUTES.map(&:to_sym))
     def initialize(attrs = {})
-      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs[f] || attrs[f.to_sym]) }
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
     end
     def self.from_hash(h); h.nil? ? nil : new(h); end
   end
 
   # List envelope for `GET /v1/Services` on the messaging host.
   class MessagingServiceList
+    include RawAttributes
     include V1Pageable
     attr_reader :services
     def initialize(hash = {})
+      @raw_attributes = hash
       assign_meta_fields(hash)
       @services = (hash['services'] || []).map { |h| MessagingService.from_hash(h) }
+    end
+  end
+
+  # MessagingServicePhoneNumber — a sender-pool phone number attached to a
+  # Messaging Service (`/v1/Services/{ChatServiceSid}/PhoneNumbers`). Lives on
+  # the messaging host.
+  class MessagingServicePhoneNumber
+    include RawAttributes
+    ATTRIBUTES = %w[
+      sid account_sid service_sid date_created date_updated
+      phone_number country_code capabilities url
+    ].freeze
+    attr_reader(*ATTRIBUTES.map(&:to_sym))
+    def initialize(attrs = {})
+      @raw_attributes = attrs
+      ATTRIBUTES.each { |f| instance_variable_set("@#{f}", attrs.key?(f) ? attrs[f] : attrs[f.to_sym]) }
+    end
+    def self.from_hash(h); h.nil? ? nil : new(h); end
+  end
+
+  # List envelope for `GET /v1/Services/{ChatServiceSid}/PhoneNumbers`.
+  class MessagingServicePhoneNumberList
+    include RawAttributes
+    include V1Pageable
+    attr_reader :phone_numbers
+    def initialize(hash = {})
+      @raw_attributes = hash
+      assign_meta_fields(hash)
+      @phone_numbers = (hash['phone_numbers'] || []).map { |h| MessagingServicePhoneNumber.from_hash(h) }
     end
   end
 end

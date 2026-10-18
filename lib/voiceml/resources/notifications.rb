@@ -26,7 +26,7 @@ module VoiceML
 
     # @return [Hash]
     def get(notification_sid)
-      @transport.request(:get, path('Notifications', notification_sid))
+      Notification.from_hash(@transport.request(:get, path('Notifications', notification_sid)))
     end
   end
 end

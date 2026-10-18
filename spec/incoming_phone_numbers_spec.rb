@@ -10,7 +10,7 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
     {
       sid: pn_sid,
       account_sid: ACCOUNT_SID,
-      phone_number: '+18005551234',
+      phone_number: '+14155550100',
       friendly_name: '',
       api_version: '2010-04-01',
       uri: "/2010-04-01/Accounts/#{ACCOUNT_SID}/IncomingPhoneNumbers/#{pn_sid}.json",
@@ -27,12 +27,12 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
   describe '#list' do
     it 'GETs the .json-suffixed path and parses the envelope' do
       stub = stub_request(:get, "#{base_url}#{accounts_path('IncomingPhoneNumbers')}")
-             .with(query: { 'PhoneNumber' => '+18005551234', 'PageSize' => '50' })
+             .with(query: { 'PhoneNumber' => '+14155550100', 'PageSize' => '50' })
              .to_return(
                status: 200,
                body: {
                  incoming_phone_numbers: [JSON.parse(make_number_body)],
-                 page: 0, page_size: 50, total: 1,
+                 page: 0, page_size: 50,
                  first_page_uri: "/2010-04-01/Accounts/#{ACCOUNT_SID}/IncomingPhoneNumbers.json?Page=0",
                  next_page_uri: nil, previous_page_uri: nil,
                  uri: "/2010-04-01/Accounts/#{ACCOUNT_SID}/IncomingPhoneNumbers.json"
@@ -40,7 +40,7 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
                headers: { 'Content-Type' => 'application/json' }
              )
 
-      result = client.incoming_phone_numbers.list(phone_number: '+18005551234', page_size: 50)
+      result = client.incoming_phone_numbers.list(phone_number: '+14155550100', page_size: 50)
 
       expect(stub).to have_been_requested
       expect(result).to be_a(VoiceML::IncomingPhoneNumberList)
@@ -49,7 +49,7 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
       expect(number).to be_a(VoiceML::IncomingPhoneNumber)
       expect(number.sid).to eq(pn_sid)
       expect(number.sid).to match(/\APN[a-f0-9]{32}\z/)
-      expect(number.phone_number).to eq('+18005551234')
+      expect(number.phone_number).to eq('+14155550100')
       expect(result.page).to eq(0)
       expect(result.page_size).to eq(50)
     end
@@ -57,7 +57,7 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
     it 'targets a path that ends in .json' do
       stub = stub_request(:get, %r{/IncomingPhoneNumbers\.json(\?|$)})
              .to_return(status: 200,
-                        body: { incoming_phone_numbers: [], page: 0, page_size: 50, total: 0 }.to_json,
+                        body: { incoming_phone_numbers: [], page: 0, page_size: 50 }.to_json,
                         headers: { 'Content-Type' => 'application/json' })
 
       client.incoming_phone_numbers.list
@@ -74,7 +74,7 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
                  'Content-Type' => 'application/x-www-form-urlencoded'
                },
                body: hash_including(
-                 'PhoneNumber' => '+18005551234',
+                 'PhoneNumber' => '+14155550100',
                  'VoiceUrl' => 'https://example.com/voice',
                  'VoiceMethod' => 'POST'
                )
@@ -83,14 +83,14 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
                         headers: { 'Content-Type' => 'application/json' })
 
       number = client.incoming_phone_numbers.create(
-        phone_number: '+18005551234',
+        phone_number: '+14155550100',
         voice_url: 'https://example.com/voice',
         voice_method: 'POST'
       )
 
       expect(stub).to have_been_requested
       expect(number.sid).to start_with('PN')
-      expect(number.phone_number).to eq('+18005551234')
+      expect(number.phone_number).to eq('+14155550100')
       expect(number.voice_url).to eq('https://example.com/voice')
     end
   end

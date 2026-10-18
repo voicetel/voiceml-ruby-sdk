@@ -29,8 +29,8 @@ RSpec.describe 'VoiceML v0.7.0' do
     it 'POSTs To, Body, and From as form fields' do
       stub_request(:post, "#{base_url}#{messages_path}")
         .with(
-          body: hash_including('To' => '+18005551234', 'Body' => 'hello',
-                               'From' => '+18005550000'),
+          body: hash_including('To' => '+14155550100', 'Body' => 'hello',
+                               'From' => '+14155550101'),
           headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
         )
         .to_return(
@@ -39,8 +39,8 @@ RSpec.describe 'VoiceML v0.7.0' do
             sid: 'SM' + ('a' * 32),
             account_sid: account_sid,
             api_version: '2010-04-01',
-            to: '+18005551234',
-            from: '+18005550000',
+            to: '+14155550100',
+            from: '+14155550101',
             body: 'hello',
             status: 'sent',
             num_segments: '1',
@@ -53,7 +53,7 @@ RSpec.describe 'VoiceML v0.7.0' do
           headers: { 'Content-Type' => 'application/json' }
         )
 
-      msg = client.messages.create(to: '+18005551234', body: 'hello', from: '+18005550000')
+      msg = client.messages.create(to: '+14155550100', body: 'hello', from: '+14155550101')
       expect(msg).to be_a(VoiceML::Message)
       expect(msg.sid).to start_with('SM')
       expect(msg.status).to eq('sent')
@@ -73,8 +73,8 @@ RSpec.describe 'VoiceML v0.7.0' do
             sid: sid,
             account_sid: account_sid,
             api_version: '2010-04-01',
-            to: '+18005551234',
-            from: '+18005550000',
+            to: '+14155550100',
+            from: '+14155550101',
             body: 'hi',
             status: 'sent',
             num_segments: '1',
@@ -97,7 +97,7 @@ RSpec.describe 'VoiceML v0.7.0' do
     it 'sends To and DateSent</> filters as query parameters' do
       stub_request(:get, "#{base_url}#{messages_path}")
         .with(query: hash_including(
-          'To'         => '+18005551234',
+          'To'         => '+14155550100',
           'DateSent<'  => '2026-06-02',
           'DateSent>'  => '2026-05-30'
         ))
@@ -109,8 +109,8 @@ RSpec.describe 'VoiceML v0.7.0' do
                 sid: 'SM' + ('c' * 32),
                 account_sid: account_sid,
                 api_version: '2010-04-01',
-                to: '+18005551234',
-                from: '+18005550000',
+                to: '+14155550100',
+                from: '+14155550101',
                 body: 'one',
                 status: 'sent',
                 num_segments: '1',
@@ -119,13 +119,13 @@ RSpec.describe 'VoiceML v0.7.0' do
                 date_created: 'x', date_updated: 'x', uri: '/x'
               }
             ],
-            page: 0, page_size: 50, total: 1, next_page_uri: nil
+            page: 0, page_size: 50, next_page_uri: nil
           }.to_json,
           headers: { 'Content-Type' => 'application/json' }
         )
 
       list = client.messages.list(
-        to: '+18005551234',
+        to: '+14155550100',
         date_sent_lt: '2026-06-02',
         date_sent_gt: '2026-05-30'
       )
@@ -146,8 +146,8 @@ RSpec.describe 'VoiceML v0.7.0' do
             sid: sid,
             account_sid: account_sid,
             api_version: '2010-04-01',
-            to: '+18005551234',
-            from: '+18005550000',
+            to: '+14155550100',
+            from: '+14155550101',
             body: '',
             status: 'sent',
             num_segments: '1',
@@ -185,7 +185,7 @@ RSpec.describe 'VoiceML v0.7.0' do
             'direction' => 'outbound-api' }
         ],
         page: 0, page_size: 2,
-        next_page_uri: "#{messages_path}?Page=1"
+        next_page_uri: "#{messages_path}?Page=1&PageToken=PASM1111111111111111111111111111111"
       }
       page1 = {
         messages: [
@@ -197,12 +197,11 @@ RSpec.describe 'VoiceML v0.7.0' do
       }
 
       stub_request(:get, "#{base_url}#{messages_path}")
-        .with(query: { 'Page' => '0' })
         .to_return(status: 200, body: page0.to_json,
                    headers: { 'Content-Type' => 'application/json' })
 
       stub_request(:get, "#{base_url}#{messages_path}")
-        .with(query: { 'Page' => '1' })
+        .with(query: { 'Page' => '1', 'PageToken' => 'PASM1111111111111111111111111111111' })
         .to_return(status: 200, body: page1.to_json,
                    headers: { 'Content-Type' => 'application/json' })
 

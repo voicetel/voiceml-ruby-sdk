@@ -189,22 +189,22 @@ RSpec.describe 'VoiceML v0.9.2 — per-product hosts, Messaging Service, Pricing
                   inbound_call_prices: [{ base_price: '0.0085', current_price: '0.0085',
                                           number_type: 'local' }],
                   price_unit: 'USD', url: "#{base}/v1/Voice/Countries/US" }.to_json
-      number = { number: '+18005551234', country: 'United States', iso_country: 'US',
+      number = { number: '+14155550100', country: 'United States', iso_country: 'US',
                  outbound_call_price: { base_price: '0.013', current_price: '0.013' },
                  inbound_call_price: { base_price: '0.0085', current_price: '0.0085',
                                        number_type: 'toll free' },
-                 price_unit: 'USD', url: "#{base}/v1/Voice/Numbers/+18005551234" }.to_json
+                 price_unit: 'USD', url: "#{base}/v1/Voice/Numbers/+14155550100" }.to_json
 
       countries_stub = stub_request(:get, "#{base}/v1/Voice/Countries")
                        .to_return(status: 200, body: countries, headers: { 'Content-Type' => 'application/json' })
       country_stub = stub_request(:get, "#{base}/v1/Voice/Countries/US")
                      .to_return(status: 200, body: country, headers: { 'Content-Type' => 'application/json' })
-      number_stub = stub_request(:get, "#{base}/v1/Voice/Numbers/%2B18005551234")
+      number_stub = stub_request(:get, "#{base}/v1/Voice/Numbers/%2B14155550100")
                     .to_return(status: 200, body: number, headers: { 'Content-Type' => 'application/json' })
 
       listed  = client.pricing.v1.voice.countries.list
       fetched = client.pricing.v1.voice.countries.fetch('US')
-      num     = client.pricing.v1.voice.numbers.fetch('+18005551234')
+      num     = client.pricing.v1.voice.numbers.fetch('+14155550100')
 
       expect(listed).to be_a(VoiceML::PricingCountriesList)
       expect(listed.countries.first.iso_country).to eq('US')
@@ -219,18 +219,18 @@ RSpec.describe 'VoiceML v0.9.2 — per-product hosts, Messaging Service, Pricing
 
   describe 'Pricing v2 voice number with origination' do
     it 'passes OriginationNumber as an (encoded) query param' do
-      payload = { destination_number: '+18005551234', origination_number: '+15551112222',
+      payload = { destination_number: '+14155550100', origination_number: '+15551112222',
                   country: 'United States', iso_country: 'US',
                   outbound_call_prices: [{ origination_prefixes: ['1'], base_price: '0.013',
                                            current_price: '0.013' }],
                   inbound_call_price: { base_price: '0.0085', current_price: '0.0085',
                                         number_type: 'local' },
-                  price_unit: 'USD', url: "#{base}/v2/Voice/Numbers/+18005551234" }.to_json
-      stub = stub_request(:get, "#{base}/v2/Voice/Numbers/%2B18005551234")
+                  price_unit: 'USD', url: "#{base}/v2/Voice/Numbers/+14155550100" }.to_json
+      stub = stub_request(:get, "#{base}/v2/Voice/Numbers/%2B14155550100")
              .with(query: { 'OriginationNumber' => '+15551112222' })
              .to_return(status: 200, body: payload, headers: { 'Content-Type' => 'application/json' })
 
-      got = client.pricing.v2.voice.numbers.fetch('+18005551234', origination_number: '+15551112222')
+      got = client.pricing.v2.voice.numbers.fetch('+14155550100', origination_number: '+15551112222')
       expect(got).to be_a(VoiceML::PricingVoiceNumberV2)
       expect(got.origination_number).to eq('+15551112222')
       expect(got.outbound_call_prices.first.origination_prefixes).to eq(['1'])
