@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'base64'
 require 'openssl'
 
 module VoiceML
@@ -37,7 +36,7 @@ module VoiceML
     def signature(url, params = {}, method: 'POST')
       data = signature_base(url, method.to_s.upcase == 'POST' ? params : nil)
       digest = OpenSSL::HMAC.digest('SHA1', @credential.call, data)
-      Base64.strict_encode64(digest)
+      [digest].pack('m0')
     end
 
     # Validate an incoming webhook. `params` may be a Hash (Array value for
