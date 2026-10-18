@@ -19,16 +19,16 @@ RSpec.describe VoiceML::RequestValidator do
     end
 
     it 'validates the reference signature' do
-      expect(validator.valid?(url, params, 'pk/0TPPT+p98NEZykeWQLqRXyGU=')).to be(true)
+      expect(validator.valid?(url, params, 'RweoLyWqNC7H8+MLXPb7EPz18OI=')).to be(true)
     end
 
     it 'accepts the same signature when the URL carries the default port' do
       expect(validator.valid?('https://example.com:443/voice/answer?case=1', params,
-                              'pk/0TPPT+p98NEZykeWQLqRXyGU=')).to be(true)
+                              'RweoLyWqNC7H8+MLXPb7EPz18OI=')).to be(true)
     end
 
     it 'accepts the signature computed over the :443 URL when validating the port-less URL' do
-      expect(validator.valid?(url, params, '/Bw0s+u5vlGd6zLAOTz/eMg33pk=')).to be(true)
+      expect(validator.valid?(url, params, 'xE0r2wPa6d1ktQeCFpPyINmTNYg=')).to be(true)
     end
   end
 
@@ -53,7 +53,7 @@ RSpec.describe VoiceML::RequestValidator do
 
     it 'rejects a tampered parameter value' do
       expect(validator.valid?(url, params.merge('Digits' => '9999'),
-                              'pk/0TPPT+p98NEZykeWQLqRXyGU=')).to be(false)
+                              'RweoLyWqNC7H8+MLXPb7EPz18OI=')).to be(false)
     end
 
     it 'rejects a signature made with the wrong key' do

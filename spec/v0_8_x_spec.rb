@@ -56,8 +56,8 @@ RSpec.describe 'VoiceML v0.8.x — SIP Trunking + Routes V2' do
   end
 
   describe 'VoiceML::VERSION' do
-    it 'reports 0.9.2' do
-      expect(VoiceML::VERSION).to eq('0.9.2')
+    it 'reports 0.9.3' do
+      expect(VoiceML::VERSION).to eq('0.9.3')
     end
   end
 
