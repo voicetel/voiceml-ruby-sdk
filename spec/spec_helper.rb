@@ -20,8 +20,10 @@ RSpec.configure do |config|
 end
 
 # A canonical fake account SID for fixture URLs.
-ACCOUNT_SID = 'AC00000000000000000000000000000001'
-API_KEY     = 'test-key'
+unless defined?(ACCOUNT_SID)
+  ACCOUNT_SID = 'AC00000000000000000000000000000001'
+  API_KEY     = 'test-key'
+end
 
 def base_url
   'https://voiceml.voicetel.com'
@@ -36,4 +38,4 @@ def basic_auth_header
   "Basic #{encoded}"
 end
 
-require 'base64'
+require 'base64' # bundled gem since Ruby 3.4; declared in the Gemfile test group
