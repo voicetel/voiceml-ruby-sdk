@@ -68,8 +68,13 @@ module PublicContract
   # rejected inputs and retry the invocation; every accepted field is then
   # checked against the independent spec, including optional fields.
   def invoke(object, method, args, kwargs)
+    bound = object.method(method)
+    takes_block = bound.parameters.any? { |kind, _| %i[block blockreq].include?(kind) }
     loop do
-      return object.public_send(method, *args, **kwargs) { |_item| }
+      if takes_block
+        return object.public_send(method, *args, **kwargs) { |_item| }
+      end
+      return object.public_send(method, *args, **kwargs)
     rescue ArgumentError => e
       unknown = e.message[/\Aunknown keyword\(s\): (.*?);/, 1]
       raise unless unknown
