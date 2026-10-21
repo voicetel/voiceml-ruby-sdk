@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.9.5] - 2026-10-21
+
+### Added
+- `time_limit` on Calls create (`TimeLimit`): maximum call duration in
+  seconds — the server rejects an explicit 0 or a value over 14400; a
+  negative value disables the limit.
+- `conference_status_callback` / `conference_status_callback_method` /
+  `conference_status_callback_event` on Conferences create_participant:
+  conference-level state webhooks, alongside the existing per-leg
+  `status_callback*` set.
+- `pause_behavior` on Conferences update_recording (`PauseBehavior`),
+  mirroring the call-scoped recording update; the method now takes
+  explicit `status:` / `pause_behavior:` kwargs.
+- `sms_url` / `sms_method` / `sms_fallback_url` / `sms_fallback_method`
+  and `public_application_connect_enabled` on Applications create and
+  update.
+- `send_at` and `schedule_type` on Messages create for scheduled sends:
+  `send_at` accepts a `Time`/`DateTime` (serialised ISO 8601 UTC) or an
+  ISO 8601 string; `schedule_type` is `"fixed"` (the only value today).
+- `speech_model`, `enable_automatic_punctuation` and
+  `intelligence_service` on Calls start_transcription.
+
+### Changed
+- Calls start_transcription: `status_callback` renamed to
+  `status_callback_url` (wire `StatusCallback` → `StatusCallbackUrl`); the
+  old wire name was never read by the server. `status_callback_method`
+  and `status_callback_events` are unchanged.
+
 ## [0.9.4] - 2026-10-21
 
 ### Added

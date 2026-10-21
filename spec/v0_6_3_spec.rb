@@ -155,8 +155,8 @@ RSpec.describe 'voiceml-ruby v0.6.3' do
   end
 
   describe 'VoiceML::VERSION' do
-    it 'reports 0.9.4' do
-      expect(VoiceML::VERSION).to eq('0.9.4')
+    it 'reports 0.9.5' do
+      expect(VoiceML::VERSION).to eq('0.9.5')
     end
   end
 end

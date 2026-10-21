@@ -27,7 +27,7 @@ RSpec.describe 'VoiceML v0.9.2 — per-product hosts, Messaging Service, Pricing
   # ===========================================================================
   describe 'version' do
     it 'is 0.9.2' do
-      expect(VoiceML::VERSION).to eq('0.9.4')
+      expect(VoiceML::VERSION).to eq('0.9.5')
     end
   end
 
