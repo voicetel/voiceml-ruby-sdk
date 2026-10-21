@@ -7,17 +7,22 @@ module VoiceML
   # Operations on `/Applications` — persistent TwiML+callback bundles.
   class ApplicationsResource < BaseResource
     APPLICATION_FIELDS = {
-      'FriendlyName'           => :friendly_name,
-      'VoiceUrl'               => :voice_url,
-      'VoiceMethod'            => :voice_method,
-      'VoiceFallbackUrl'       => :voice_fallback_url,
-      'VoiceFallbackMethod'    => :voice_fallback_method,
-      'VoiceCallerIdLookup'    => :voice_caller_id_lookup,
-      'StatusCallback'         => :status_callback,
-      'StatusCallbackMethod'   => :status_callback_method,
-      'StatusCallbackEvent'    => :status_callback_event,
-      'MessageStatusCallback'  => :message_status_callback,
-      'SmsStatusCallback'      => :sms_status_callback
+      'FriendlyName'                    => :friendly_name,
+      'VoiceUrl'                        => :voice_url,
+      'VoiceMethod'                     => :voice_method,
+      'VoiceFallbackUrl'                => :voice_fallback_url,
+      'VoiceFallbackMethod'             => :voice_fallback_method,
+      'VoiceCallerIdLookup'             => :voice_caller_id_lookup,
+      'StatusCallback'                  => :status_callback,
+      'StatusCallbackMethod'            => :status_callback_method,
+      'StatusCallbackEvent'             => :status_callback_event,
+      'MessageStatusCallback'           => :message_status_callback,
+      'SmsStatusCallback'               => :sms_status_callback,
+      'SmsUrl'                          => :sms_url,
+      'SmsMethod'                       => :sms_method,
+      'SmsFallbackUrl'                  => :sms_fallback_url,
+      'SmsFallbackMethod'               => :sms_fallback_method,
+      'PublicApplicationConnectEnabled' => :public_application_connect_enabled
     }.freeze
 
     LIST_FIELDS = {

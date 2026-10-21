@@ -27,20 +27,24 @@ module VoiceML
     }.freeze
 
     CREATE_PARTICIPANT_FIELDS = {
-      'From'                   => :from,
-      'To'                     => :to,
-      'Label'                  => :label,
-      'Muted'                  => :muted,
-      'StartConferenceOnEnter' => :start_conference_on_enter,
-      'EndConferenceOnExit'    => :end_conference_on_exit,
-      'Timeout'                => :timeout,
-      'StatusCallback'         => :status_callback,
-      'StatusCallbackMethod'   => :status_callback_method,
-      'StatusCallbackEvent'    => :status_callback_event
+      'From'                            => :from,
+      'To'                              => :to,
+      'Label'                           => :label,
+      'Muted'                           => :muted,
+      'StartConferenceOnEnter'          => :start_conference_on_enter,
+      'EndConferenceOnExit'             => :end_conference_on_exit,
+      'Timeout'                         => :timeout,
+      'StatusCallback'                  => :status_callback,
+      'StatusCallbackMethod'            => :status_callback_method,
+      'StatusCallbackEvent'             => :status_callback_event,
+      'ConferenceStatusCallback'        => :conference_status_callback,
+      'ConferenceStatusCallbackMethod'  => :conference_status_callback_method,
+      'ConferenceStatusCallbackEvent'   => :conference_status_callback_event
     }.freeze
 
     UPDATE_RECORDING_FIELDS = {
-      'Status' => :status
+      'Status'        => :status,
+      'PauseBehavior' => :pause_behavior
     }.freeze
 
     START_RECORDING_FIELDS = {
@@ -137,7 +141,9 @@ module VoiceML
       nil
     end
 
-    # Dial a leg into a conference.
+    # Dial a leg into a conference. `status_callback*:` kwargs fire on participant-leg
+    # state changes; `conference_status_callback*:` fire on conference-level state
+    # changes (e.g. `conference-status-callback-event: start,end`).
     # @return [VoiceML::Participant]
     def create_participant(conference_sid, from:, to:, **kwargs)
       kwargs = kwargs.merge(from: from, to: to)
@@ -180,12 +186,16 @@ module VoiceML
       )
     end
 
+    # @param status [String] one of "in-progress", "paused", "stopped".
+    # @param pause_behavior [String, nil] how a paused recording treats silence
+    #   (e.g. "skip" — see the API docs for `PauseBehavior`).
     # @return [VoiceML::Recording]
-    def update_recording(conference_sid, recording_sid, **kwargs)
+    def update_recording(conference_sid, recording_sid, status:, pause_behavior: nil)
       data = @transport.request(
         :post,
         path('Conferences', conference_sid, 'Recordings', recording_sid),
-        form: form_params(UPDATE_RECORDING_FIELDS, kwargs)
+        form: form_params(UPDATE_RECORDING_FIELDS,
+                          { status: status, pause_behavior: pause_behavior })
       )
       Recording.from_hash(data)
     end

@@ -20,7 +20,9 @@ module VoiceML
       'MessagingServiceSid'  => :messaging_service_sid,
       'ValidityPeriod'       => :validity_period,
       'StatusCallback'       => :status_callback,
-      'StatusCallbackMethod' => :status_callback_method
+      'StatusCallbackMethod' => :status_callback_method,
+      'SendAt'               => :send_at,
+      'ScheduleType'         => :schedule_type
     }.freeze
 
     LIST_FIELDS = {
@@ -56,6 +58,9 @@ module VoiceML
     # `body:` (SMS text) or `media_url:` (MMS media; pass a string or an array —
     # repeated keys are sent on the wire). `from:` falls back to the tenant's
     # configured default sender when omitted.
+    #
+    # Scheduling: `send_at:` accepts a `Time`/`DateTime` (serialised ISO 8601 UTC)
+    # or an ISO 8601 string; `schedule_type:` is `"fixed"` (the only value today).
     #
     # @return [VoiceML::Message]
     def create(**kwargs)

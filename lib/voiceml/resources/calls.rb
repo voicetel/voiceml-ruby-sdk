@@ -44,6 +44,7 @@ module VoiceML
       'RecordingTrack'                        => :recording_track,
       'Trim'                                  => :trim,
       'Timeout'                               => :timeout,
+      'TimeLimit'                             => :time_limit,
       'SendDigits'                            => :send_digits,
       'CallerId'                              => :caller_id,
       'CallReason'                            => :call_reason,
@@ -139,16 +140,19 @@ module VoiceML
     }.freeze
 
     START_TRANSCRIPTION_FIELDS = {
-      'Name'                 => :name,
-      'Track'                => :track,
-      'LanguageCode'         => :language_code,
-      'TranscriptionEngine'  => :transcription_engine,
-      'ProfanityFilter'      => :profanity_filter,
-      'PartialResults'       => :partial_results,
-      'Hints'                => :hints,
-      'StatusCallback'       => :status_callback,
-      'StatusCallbackMethod' => :status_callback_method,
-      'StatusCallbackEvents' => :status_callback_events
+      'Name'                        => :name,
+      'Track'                       => :track,
+      'LanguageCode'                => :language_code,
+      'TranscriptionEngine'         => :transcription_engine,
+      'ProfanityFilter'             => :profanity_filter,
+      'PartialResults'              => :partial_results,
+      'Hints'                       => :hints,
+      'SpeechModel'                 => :speech_model,
+      'EnableAutomaticPunctuation'  => :enable_automatic_punctuation,
+      'IntelligenceService'         => :intelligence_service,
+      'StatusCallbackUrl'           => :status_callback_url,
+      'StatusCallbackMethod'        => :status_callback_method,
+      'StatusCallbackEvents'        => :status_callback_events
     }.freeze
 
     START_PAYMENT_FIELDS = {
@@ -209,6 +213,9 @@ module VoiceML
     #
     # Pass at most one of `url:` / `twiml:` / `application_sid:` (Twiml wins if multiple are set
     # — Twilio's documented precedence).
+    #
+    # `time_limit:` caps the call duration in seconds (max 14400; the server rejects
+    # an explicit 0, and a negative value disables the limit).
     #
     # @return [VoiceML::Call]
     def create(**kwargs)
@@ -322,6 +329,11 @@ module VoiceML
     # (405 / 20004). Stored-recording transcriptions live on
     # {VoiceML::RecordingsResource} and {VoiceML::TranscriptionsResource}.
 
+    # Start real-time transcription on the live call. The events webhook kwarg is
+    # `status_callback_url:` (wire `StatusCallbackUrl`); `status_callback_method:` /
+    # `status_callback_events:` keep their plural wire names. `speech_model:`,
+    # `enable_automatic_punctuation:` and `intelligence_service:` tune the engine.
+    #
     # @return [VoiceML::CallTranscription]
     def start_transcription(call_sid, **kwargs)
       data = @transport.request(:post, path('Calls', call_sid, 'Transcriptions'),
