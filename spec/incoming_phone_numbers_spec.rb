@@ -93,6 +93,29 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
       expect(number.phone_number).to eq('+14155550100')
       expect(number.voice_url).to eq('https://example.com/voice')
     end
+
+    it 'sends VoiceApplicationSid, StatusCallback and StatusCallbackMethod as PascalCase form keys' do
+      stub = stub_request(:post, "#{base_url}#{accounts_path('IncomingPhoneNumbers')}")
+             .with(
+               body: hash_including(
+                 'PhoneNumber' => '+14155550100',
+                 'VoiceApplicationSid' => 'AP0123456789abcdef0123456789abcdef',
+                 'StatusCallback' => 'https://example.com/lifecycle',
+                 'StatusCallbackMethod' => 'GET'
+               )
+             )
+             .to_return(status: 201, body: make_number_body,
+                        headers: { 'Content-Type' => 'application/json' })
+
+      client.incoming_phone_numbers.create(
+        phone_number: '+14155550100',
+        voice_application_sid: 'AP0123456789abcdef0123456789abcdef',
+        status_callback: 'https://example.com/lifecycle',
+        status_callback_method: 'GET'
+      )
+
+      expect(stub).to have_been_requested
+    end
   end
 
   describe '#get' do
@@ -124,6 +147,28 @@ RSpec.describe VoiceML::IncomingPhoneNumbersResource do
 
       expect(stub).to have_been_requested
       expect(number.voice_url).to eq('https://example.com/v2')
+    end
+
+    it 'sends number-level callback and voice-application fields as PascalCase form keys' do
+      stub = stub_request(:post, "#{base_url}#{accounts_path('IncomingPhoneNumbers', pn_sid)}")
+             .with(
+               body: hash_including(
+                 'VoiceApplicationSid' => 'AP0123456789abcdef0123456789abcdef',
+                 'StatusCallback' => 'https://example.com/lifecycle',
+                 'StatusCallbackMethod' => 'POST'
+               )
+             )
+             .to_return(status: 200, body: make_number_body,
+                        headers: { 'Content-Type' => 'application/json' })
+
+      client.incoming_phone_numbers.update(
+        pn_sid,
+        voice_application_sid: 'AP0123456789abcdef0123456789abcdef',
+        status_callback: 'https://example.com/lifecycle',
+        status_callback_method: 'POST'
+      )
+
+      expect(stub).to have_been_requested
     end
   end
 

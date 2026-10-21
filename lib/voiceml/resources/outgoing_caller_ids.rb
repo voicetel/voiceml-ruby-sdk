@@ -15,8 +15,12 @@ module VoiceML
     }.freeze
 
     CREATE_FIELDS = {
-      'PhoneNumber'  => :phone_number,
-      'FriendlyName' => :friendly_name
+      'PhoneNumber'          => :phone_number,
+      'FriendlyName'         => :friendly_name,
+      'CallDelay'            => :call_delay,
+      'Extension'            => :extension,
+      'StatusCallback'       => :status_callback,
+      'StatusCallbackMethod' => :status_callback_method
     }.freeze
 
     UPDATE_FIELDS = {
@@ -39,13 +43,26 @@ module VoiceML
     #
     # @param phone_number [String] required. E.164.
     # @param friendly_name [String, nil] display label.
+    # @param call_delay [Integer, nil] seconds to wait before placing the
+    #   verification call (0-60).
+    # @param extension [String, nil] DTMF extension dialed after the
+    #   verification call connects.
+    # @param status_callback [String, nil] fires at the end of the verification
+    #   call with the verification outcome.
+    # @param status_callback_method [String, nil] HTTP method for
+    #   `status_callback` (`GET`/`POST`).
     # @return [VoiceML::ValidationRequest]
-    def create(phone_number:, friendly_name: nil)
+    def create(phone_number:, friendly_name: nil, call_delay: nil, extension: nil,
+               status_callback: nil, status_callback_method: nil)
       ValidationRequest.from_hash(
         @transport.request(:post, path('OutgoingCallerIds'),
                            form: form_params(CREATE_FIELDS,
                                              { phone_number: phone_number,
-                                               friendly_name: friendly_name }))
+                                               friendly_name: friendly_name,
+                                               call_delay: call_delay,
+                                               extension: extension,
+                                               status_callback: status_callback,
+                                               status_callback_method: status_callback_method }))
       )
     end
 

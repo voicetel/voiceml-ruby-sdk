@@ -21,28 +21,34 @@ module VoiceML
     }.freeze
 
     CREATE_FIELDS = {
-      'PhoneNumber'         => :phone_number,
-      'VoiceUrl'            => :voice_url,
-      'VoiceMethod'         => :voice_method,
-      'VoiceFallbackUrl'    => :voice_fallback_url,
-      'VoiceFallbackMethod' => :voice_fallback_method,
-      'SmsUrl'              => :sms_url,
-      'SmsMethod'           => :sms_method,
-      'SmsFallbackUrl'      => :sms_fallback_url,
-      'SmsFallbackMethod'   => :sms_fallback_method,
-      'SmsApplicationSid'   => :sms_application_sid
+      'PhoneNumber'          => :phone_number,
+      'VoiceUrl'             => :voice_url,
+      'VoiceMethod'          => :voice_method,
+      'VoiceFallbackUrl'     => :voice_fallback_url,
+      'VoiceFallbackMethod'  => :voice_fallback_method,
+      'SmsUrl'               => :sms_url,
+      'SmsMethod'            => :sms_method,
+      'SmsFallbackUrl'       => :sms_fallback_url,
+      'SmsFallbackMethod'    => :sms_fallback_method,
+      'SmsApplicationSid'    => :sms_application_sid,
+      'VoiceApplicationSid'  => :voice_application_sid,
+      'StatusCallback'       => :status_callback,
+      'StatusCallbackMethod' => :status_callback_method
     }.freeze
 
     UPDATE_FIELDS = {
-      'VoiceUrl'            => :voice_url,
-      'VoiceMethod'         => :voice_method,
-      'VoiceFallbackUrl'    => :voice_fallback_url,
-      'VoiceFallbackMethod' => :voice_fallback_method,
-      'SmsUrl'              => :sms_url,
-      'SmsMethod'           => :sms_method,
-      'SmsFallbackUrl'      => :sms_fallback_url,
-      'SmsFallbackMethod'   => :sms_fallback_method,
-      'SmsApplicationSid'   => :sms_application_sid
+      'VoiceUrl'             => :voice_url,
+      'VoiceMethod'          => :voice_method,
+      'VoiceFallbackUrl'     => :voice_fallback_url,
+      'VoiceFallbackMethod'  => :voice_fallback_method,
+      'SmsUrl'               => :sms_url,
+      'SmsMethod'            => :sms_method,
+      'SmsFallbackUrl'       => :sms_fallback_url,
+      'SmsFallbackMethod'    => :sms_fallback_method,
+      'SmsApplicationSid'    => :sms_application_sid,
+      'VoiceApplicationSid'  => :voice_application_sid,
+      'StatusCallback'       => :status_callback,
+      'StatusCallbackMethod' => :status_callback_method
     }.freeze
 
     # The typed Local/Mobile/TollFree creates take a reduced body: only
@@ -88,18 +94,28 @@ module VoiceML
     # @param sms_fallback_method [String, nil] HTTP method for `sms_fallback_url`.
     # @param sms_application_sid [String, nil] `AP`-prefixed Application that
     #   handles inbound SMS (`^AP[0-9a-fA-F]{32}$`).
+    # @param voice_application_sid [String, nil] `AP`-prefixed Application whose
+    #   voice config wins outright over the number's own Voice* fields.
+    # @param status_callback [String, nil] number-level lifecycle webhook for
+    #   inbound calls to this DID.
+    # @param status_callback_method [String, nil] HTTP method for
+    #   `status_callback` (`GET`/`POST`).
     # @return [VoiceML::IncomingPhoneNumber]
     def create(phone_number:, voice_url: nil, voice_method: nil,
                voice_fallback_url: nil, voice_fallback_method: nil,
                sms_url: nil, sms_method: nil, sms_fallback_url: nil,
-               sms_fallback_method: nil, sms_application_sid: nil)
+               sms_fallback_method: nil, sms_application_sid: nil,
+               voice_application_sid: nil, status_callback: nil,
+               status_callback_method: nil)
       kwargs = {
         phone_number: phone_number,
         voice_url: voice_url, voice_method: voice_method,
         voice_fallback_url: voice_fallback_url, voice_fallback_method: voice_fallback_method,
         sms_url: sms_url, sms_method: sms_method,
         sms_fallback_url: sms_fallback_url, sms_fallback_method: sms_fallback_method,
-        sms_application_sid: sms_application_sid
+        sms_application_sid: sms_application_sid,
+        voice_application_sid: voice_application_sid,
+        status_callback: status_callback, status_callback_method: status_callback_method
       }
       IncomingPhoneNumber.from_hash(
         @transport.request(:post, path('IncomingPhoneNumbers'),
