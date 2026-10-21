@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.4] - 2026-10-21
+
+### Added
+- `voice_application_sid` / `status_callback` / `status_callback_method`
+  on IncomingPhoneNumbers create and update: bind the number to an
+  Application whose voice config wins over the number's own Voice*
+  fields, and set the number-level lifecycle webhook for inbound calls.
+- `call_delay` / `extension` / `status_callback` /
+  `status_callback_method` on OutgoingCallerIds create: verification-call
+  parameters (seconds to wait before placing the call, DTMF extension
+  dialed after connect, and the webhook that fires with the verification
+  outcome).
+
 ## [0.9.3] - 2026-10-18
 
 ### Breaking changes
